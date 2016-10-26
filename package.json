@@ -1,11 +1,12 @@
 {
-  "name": "phosphor-dockpanel",
-  "version": "0.9.7",
-  "description": "A widget which provides a flexible docking area for content widgets.",
+  "name": "todo-taskpaper",
+  "version": "0.0.1",
+  "description": "Enhanced text editor for TaskPaper files.",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
   "dependencies": {
     "phosphor-arrays": "^1.0.6",
+    "phosphor-dockpanel": "^0.9.7",
     "phosphor-domutil": "^1.2.0",
     "phosphor-dragdrop": "^0.9.0",
     "phosphor-messaging": "^1.0.6",
@@ -57,7 +58,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/phosphorjs/phosphor-dockpanel.git"
+    "url": "https://github.com/Leftium/todo.taskpaper"
   },
   "files": [
     "lib/*.css",
@@ -65,17 +66,13 @@
     "lib/*.js"
   ],
   "keywords": [
-    "dock",
-    "docking",
-    "dockpanel",
-    "panel",
-    "ui",
-    "widget"
+    "todo",
+    "taskpaper"
   ],
-  "author": "S. Chris Colbert <sccolbert@gmail.com>",
-  "license": "BSD-3-Clause",
+  "author": "John-Kim Murphy <john@leftium.com>",
+  "license": "MIT",
   "bugs": {
-    "url": "https://github.com/phosphorjs/phosphor-dockpanel/issues"
+    "url": "https://github.com/Leftium/todo.taskpaper/issues"
   },
-  "homepage": "https://github.com/phosphorjs/phosphor-dockpanel"
+  "homepage": "https://github.com/Leftium/todo.taskpaper"
 }

@@ -8,26 +8,77 @@
 'use strict';
 
 import {
-  Widget
-} from 'phosphor-widget';
+  DockPanel
+} from 'phosphor-dockpanel';
 
 import {
-  DockPanel
-} from '../lib/index';
+  Message
+} from 'phosphor-messaging';
+
+import {
+  ResizeMessage, Widget
+} from 'phosphor-widget';
 
 import './index.css';
 
 
+/**
+ * A widget which hosts a CodeMirror editor.
+ */
+class CodeMirrorWidget extends Widget {
+
+  constructor(config?: CodeMirror.EditorConfiguration) {
+    super();
+    this.addClass('CodeMirrorWidget');
+    this._editor = CodeMirror(this.node, config);
+  }
+
+  get editor(): CodeMirror.Editor {
+    return this._editor;
+  }
+
+  loadTarget(target: string): void {
+    var doc = this._editor.getDoc();
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', target);
+    xhr.onreadystatechange = () => doc.setValue(xhr.responseText);
+    xhr.send();
+  }
+
+  protected onAfterAttach(msg: Message): void {
+    this._editor.refresh();
+  }
+
+  protected onResize(msg: ResizeMessage): void {
+    if (msg.width < 0 || msg.height < 0) {
+      this._editor.refresh();
+    } else {
+      this._editor.setSize(msg.width, msg.height);
+    }
+  }
+
+  private _editor: CodeMirror.Editor;
+}
+
+
+/**
+ * Create a placeholder content widget.
+ */
 function createContent(title: string): Widget {
   let widget = new Widget();
   widget.addClass('content');
   widget.addClass(title.toLowerCase());
+
   widget.title.text = title;
   widget.title.closable = true;
+
   return widget;
 }
 
 
+/**
+ * The main application entry point.
+ */
 function main(): void {
   let r1 = createContent('Red');
   let r2 = createContent('Red');
@@ -48,16 +99,31 @@ function main(): void {
   let panel = new DockPanel();
   panel.id = 'main';
 
-  panel.insertLeft(r1);
+  var cmSource = new CodeMirrorWidget({
+    mode: 'text/typescript',
+    lineNumbers: true,
+    tabSize: 2,
+  });
+  cmSource.loadTarget('./index.ts');
+  cmSource.title.text = 'Source';
 
-  panel.insertRight(b1, r1);
+  var cmCss = new CodeMirrorWidget({
+    mode: 'text/css',
+    lineNumbers: true,
+    tabSize: 2,
+  });
+  cmCss.loadTarget('./index.css');
+  cmCss.title.text = 'CSS';
+
+  panel.insertLeft(cmSource);
+  panel.insertRight(b1, cmSource);
   panel.insertBottom(y1, b1);
   panel.insertLeft(g1, y1);
 
   panel.insertBottom(b2);
 
-  panel.insertTabBefore(y2, r1);
-  panel.insertTabBefore(b3, y2);
+  panel.insertTabAfter(cmCss, cmSource);
+  panel.insertTabAfter(r1, cmCss);
   panel.insertTabBefore(g2, b2);
   panel.insertTabBefore(y3, g2);
   panel.insertTabBefore(g3, y3);
