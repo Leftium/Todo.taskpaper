@@ -2,8 +2,6 @@
   "name": "todo-taskpaper",
   "version": "0.0.1",
   "description": "Enhanced text editor for TaskPaper files.",
-  "main": "lib/index.js",
-  "typings": "lib/index.d.ts",
   "dependencies": {
     "phosphor-arrays": "^1.0.6",
     "phosphor-dockpanel": "^0.9.7",
@@ -40,31 +38,15 @@
     "webpack": "^1.12.9"
   },
   "scripts": {
-    "clean": "rimraf lib && rimraf test/build && rimraf test/coverage",
-    "clean:example": "rimraf example/bundle.js",
-    "build:example": "webpack --config example/webpack.conf.js",
-    "build:src": "tsc --project src",
-    "build:css": "node scripts/copycss.js",
-    "build": "npm run build:src && npm run build:css",
-    "docs": "rimraf docs/api && typedoc --options scripts/tdoptions.json",
+    "clean": "rimraf src/bundle.js",
+    "build": "webpack --config src/webpack.conf.js",
     "postinstall": "npm dedupe",
-    "prepublish": "npm run build",
-    "test:chrome": "karma start --browsers=Chrome test/karma.conf.js",
-    "test:coverage": "karma start test/karma-cov.conf.js",
-    "test:firefox": "karma start --browsers=Firefox test/karma.conf.js",
-    "test:ie": "karma start --browsers=IE test/karma.conf.js",
-    "test:debug": "karma start --browsers=Chrome --singleRun=false --debug=true test/karma.conf.js",
-    "test": "npm run test:firefox"
+    "prepublish": "npm run build"
   },
   "repository": {
     "type": "git",
     "url": "https://github.com/Leftium/todo.taskpaper"
   },
-  "files": [
-    "lib/*.css",
-    "lib/*.d.ts",
-    "lib/*.js"
-  ],
   "keywords": [
     "todo",
     "taskpaper"

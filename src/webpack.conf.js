@@ -1,8 +1,8 @@
 
 module.exports = {
-  entry: './example/index.ts',
+  entry: './src/index.ts',
   output: {
-    filename: './example/bundle.js'
+    filename: './src/bundle.js'
   },
   resolve: {
     extensions: ['', '.ts', '.js']
