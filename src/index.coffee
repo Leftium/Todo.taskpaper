@@ -59,11 +59,11 @@ main = () ->
   b1 = createContent('Blue')
 
   cmSource = new CodeMirrorWidget({
-    mode: 'text/typescript',
+    mode: 'text/x-coffeescript',
     lineNumbers: true,
     tabSize: 2,
   })
-  cmSource.loadTarget('./index.ts')
+  cmSource.loadTarget('./index.coffee')
   cmSource.title.text = 'Source'
 
   cmCss = new CodeMirrorWidget({
