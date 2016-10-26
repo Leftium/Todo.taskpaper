@@ -80,26 +80,12 @@ function createContent(title: string): Widget {
  * The main application entry point.
  */
 function main(): void {
-  let r1 = createContent('Red');
-  let r2 = createContent('Red');
-  let r3 = createContent('Red');
-
-  let b1 = createContent('Blue');
-  let b2 = createContent('Blue');
-  let b3 = createContent('Blue');
-
-  let g1 = createContent('Green');
-  let g2 = createContent('Green');
-  let g3 = createContent('Green');
-
-  let y1 = createContent('Yellow');
-  let y2 = createContent('Yellow');
-  let y3 = createContent('Yellow');
-
   let panel = new DockPanel();
   panel.id = 'main';
 
-  var cmSource = new CodeMirrorWidget({
+  let b1 = createContent('Blue');
+
+  let cmSource = new CodeMirrorWidget({
     mode: 'text/typescript',
     lineNumbers: true,
     tabSize: 2,
@@ -107,7 +93,7 @@ function main(): void {
   cmSource.loadTarget('./index.ts');
   cmSource.title.text = 'Source';
 
-  var cmCss = new CodeMirrorWidget({
+  let cmCss = new CodeMirrorWidget({
     mode: 'text/css',
     lineNumbers: true,
     tabSize: 2,
@@ -116,20 +102,8 @@ function main(): void {
   cmCss.title.text = 'CSS';
 
   panel.insertLeft(cmSource);
-  panel.insertRight(b1, cmSource);
-  panel.insertBottom(y1, b1);
-  panel.insertLeft(g1, y1);
-
-  panel.insertBottom(b2);
-
   panel.insertTabAfter(cmCss, cmSource);
-  panel.insertTabAfter(r1, cmCss);
-  panel.insertTabBefore(g2, b2);
-  panel.insertTabBefore(y3, g2);
-  panel.insertTabBefore(g3, y3);
-  panel.insertTabBefore(r2, b1);
-  panel.insertTabBefore(r3, y1);
-
+  panel.insertBottom(b1, cmSource);
   panel.attach(document.body);
 
   window.onresize = () => { panel.update(); };
