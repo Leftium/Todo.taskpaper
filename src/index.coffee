@@ -58,10 +58,21 @@ main = () ->
 
   b1 = createContent('Blue')
 
+  cmTaskpaper = new CodeMirrorWidget({
+    mode: 'text/plain'
+    lineNumbers: true
+    foldGutter:
+        rangeFinder: CodeMirror.fold.indent
+    gutters: ['CodeMirror-linenumbers', 'CodeMirror-foldgutter']
+    tabSize: 4
+  })
+  cmTaskpaper.loadTarget('./todo.taskpaper')
+  cmTaskpaper.title.text = 'Todo.taskpaper'
+
   cmSource = new CodeMirrorWidget({
-    mode: 'text/x-coffeescript',
+    mode: 'text/coffeescript',
     lineNumbers: true,
-    tabSize: 2,
+    tabSize: 4,
   })
   cmSource.loadTarget('./index.coffee')
   cmSource.title.text = 'Source'
@@ -69,14 +80,15 @@ main = () ->
   cmCss = new CodeMirrorWidget({
     mode: 'text/css',
     lineNumbers: true,
-    tabSize: 2,
+    tabSize: 4,
   })
   cmCss.loadTarget('./index.css')
   cmCss.title.text = 'CSS'
 
-  panel.insertLeft(cmSource)
+  panel.insertLeft(cmTaskpaper)
+  panel.insertTabAfter(cmSource, cmTaskpaper)
   panel.insertTabAfter(cmCss, cmSource)
-  panel.insertBottom(b1, cmSource)
+  panel.insertBottom(b1, cmTaskpaper)
   panel.attach(document.body)
 
   window.onresize = () -> panel.update()
