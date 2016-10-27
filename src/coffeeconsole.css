@@ -1,0 +1,84 @@
+.CoffeeConsoleWidget {
+    background-color: #222;
+    color: #fff;
+    font-size: 14px;
+    font-family: DejaVu Sans Mono, monospace;
+    overflow-y: scroll;
+}
+
+.CoffeeConsoleWidget a {
+    color: #fff;
+    text-decoration: none;
+}
+.CoffeeConsoleWidget a:hover {
+    text-decoration: underline;
+}
+.CoffeeConsoleWidget pre {
+    margin: 0;
+    padding: 0;
+    font: inherit;
+}
+
+.CoffeeConsoleWidget .container {
+    width: 100%;
+    height: 100%;
+    font: inherit;
+}
+.CoffeeConsoleWidget .output {
+    word-wrap: break-word;
+}
+.CoffeeConsoleWidget .inputdiv {
+    width: 100%;
+}
+.CoffeeConsoleWidget .inputl {
+    display: inline;
+    float: left;
+}
+.CoffeeConsoleWidget .inputr {
+    display: inline;
+    float: left;
+}
+.CoffeeConsoleWidget .input {
+    border: none;
+    outline: none;
+    background-color: #222;
+    color: #fff;
+    font: inherit;
+    margin: 0;
+    padding: 0;
+    resize: none;
+    position: absolute;
+    overflow: hidden;
+}
+.CoffeeConsoleWidget .inputcopy {
+    display: none;
+    white-space: pre-wrap;
+    min-height: 2em;
+    padding: 0;
+    margin: 0;
+    word-wrap: break-word;
+}
+.CoffeeConsoleWidget .s_special { color: #4ff }
+.CoffeeConsoleWidget .s_number { color: #ff4 }
+.CoffeeConsoleWidget .s_boolean { color: #ff4 }
+.CoffeeConsoleWidget .s_undefined { color: #999 }
+.CoffeeConsoleWidget .s_null { font-weight: bold }
+.CoffeeConsoleWidget .s_string { color: #4f4 }
+.CoffeeConsoleWidget .s_date { color: #f4f }
+.CoffeeConsoleWidget .s_regexp { color: #f44 }
+
+.CoffeeConsoleWidget .ansi-bold      { font-weight: bold  }
+.CoffeeConsoleWidget .ansi-italic    { font-style: italic  }
+.CoffeeConsoleWidget .ansi-underline { font-style: underline }
+.CoffeeConsoleWidget .ansi-inverse   { color: black; background-color: white }
+.CoffeeConsoleWidget .ansi-white     { color: white }
+.CoffeeConsoleWidget .ansi-grey      { color: grey }
+.CoffeeConsoleWidget .ansi-black     { color: black }
+.CoffeeConsoleWidget .ansi-blue      { color: blue }
+.CoffeeConsoleWidget .ansi-cyan      { color: cyan }
+.CoffeeConsoleWidget .ansi-green     { color: green }
+.CoffeeConsoleWidget .ansi-magenta   { color: magenta }
+.CoffeeConsoleWidget .ansi-red       { color: red }
+.CoffeeConsoleWidget .ansi-yellow    { color: yellow }
+
+

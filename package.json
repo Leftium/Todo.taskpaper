@@ -3,6 +3,7 @@
   "version": "0.0.1",
   "description": "Enhanced text editor for TaskPaper files.",
   "dependencies": {
+    "coffee-script": "^1.11.1",
     "phosphor-arrays": "^1.0.6",
     "phosphor-codemirror": "0.0.1",
     "phosphor-dockpanel": "^0.9.7",
@@ -14,7 +15,8 @@
     "phosphor-splitpanel": "^1.0.0-rc.1",
     "phosphor-stackedpanel": "^1.0.0-rc.0",
     "phosphor-tabs": "^1.0.0-rc.2",
-    "phosphor-widget": "^1.0.0-rc.0"
+    "phosphor-widget": "^1.0.0-rc.0",
+    "util": "^0.10.3"
   },
   "devDependencies": {
     "babel-core": "^6.18.0",
