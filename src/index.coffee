@@ -1,39 +1,31 @@
 # Based on http://phosphorjs.github.io/examples/dockpanel/
 
 import { DockPanel } from 'phosphor-dockpanel'
+import { CodeMirrorWidget } from 'phosphor-codemirror'
 import { Message } from 'phosphor-messaging'
 import { ResizeMessage, Widget } from 'phosphor-widget'
 
+import CodeMirror from 'codemirror'
+
+import 'codemirror/mode/coffeescript/coffeescript'
+import 'codemirror/mode/css/css'
+import 'codemirror/addon/fold/foldcode.js'
+import 'codemirror/addon/fold/foldgutter.js'
+import 'codemirror/addon/fold/indent-fold.js'
+
+import 'codemirror/lib/codemirror.css'
+import 'codemirror/addon/fold/foldgutter.css'
 import './index.css'
 
 #
-# A widget which hosts a CodeMirror editor.
+# Inject a method to load a file via AJAX.
 #
-class CodeMirrorWidget extends Widget
-  constructor: (config) ->
-    super()
-    @addClass('CodeMirrorWidget')
-    @_editor = CodeMirror(@node, config)
-
-  loadTarget: (target) ->
+CodeMirrorWidget.prototype.loadTarget = (target) ->
     doc = @_editor.getDoc()
     xhr = new XMLHttpRequest()
     xhr.open('GET', target)
     xhr.onreadystatechange = () -> doc.setValue(xhr.responseText)
     xhr.send()
-
-  onAfterAttach: (msg) ->
-    @_editor.refresh()
-
-  onResize: (msg) ->
-    if msg.width < 0 or msg.height < 0
-      @_editor.refresh()
-    else
-      @_editor.setSize(msg.width, msg.height)
-
-  _editor: CodeMirror.Editor
-
-
 
 #
 # Create a placeholder content widget.

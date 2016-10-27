@@ -4,6 +4,7 @@
   "description": "Enhanced text editor for TaskPaper files.",
   "dependencies": {
     "phosphor-arrays": "^1.0.6",
+    "phosphor-codemirror": "0.0.1",
     "phosphor-dockpanel": "^0.9.7",
     "phosphor-domutil": "^1.2.0",
     "phosphor-dragdrop": "^0.9.0",
