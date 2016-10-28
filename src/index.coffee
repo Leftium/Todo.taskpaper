@@ -35,7 +35,7 @@ main = () ->
     panel = new DockPanel()
     panel.id = 'main'
 
-    coffeeconsole = new CoffeeConsoleWidget('Blue')
+    coffeeconsole = new CoffeeConsoleWidget()
     coffeeconsole.title.text = 'CoffeeScript REPL'
 
     cmTaskpaper = new CodeMirrorWidget({
@@ -49,25 +49,7 @@ main = () ->
     cmTaskpaper.loadTarget('./todo.taskpaper')
     cmTaskpaper.title.text = 'Todo.taskpaper'
 
-    cmSource = new CodeMirrorWidget({
-        mode: 'text/coffeescript',
-        lineNumbers: true,
-        tabSize: 4,
-    })
-    cmSource.loadTarget('./index.coffee')
-    cmSource.title.text = 'Source'
-
-    cmCss = new CodeMirrorWidget({
-        mode: 'text/css',
-        lineNumbers: true,
-        tabSize: 4,
-    })
-    cmCss.loadTarget('./index.css')
-    cmCss.title.text = 'CSS'
-
     panel.insertLeft(cmTaskpaper)
-    panel.insertTabAfter(cmSource, cmTaskpaper)
-    panel.insertTabAfter(cmCss, cmSource)
     panel.insertBottom(coffeeconsole, cmTaskpaper)
     panel.attach(document.body)
 
