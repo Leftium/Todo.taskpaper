@@ -22,8 +22,8 @@ escapeHTML = (s) ->
 
 class CoffeeREPL
     DEFAULT_SETTINGS =
-        lastVariable: '$_'
-        maxLines: 500
+        lastVariable: '_'
+        maxLines: 10000
         maxDepth: 2
         showHidden: false
         colorize: true
