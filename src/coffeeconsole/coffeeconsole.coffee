@@ -72,8 +72,12 @@ class CoffeeREPL
                 # while Chrome does.
                 if output.split('\n')[0] isnt e.toString()
                     output = "#{e.toString()}\n#{e.stack}"
+
+                # Remove calling stack, which is usually not helpful.
+                output = output.split('\n')[0]
             else
                 output = e.toString()
+
         @saved = ''
 
         openSpan = (colorName) -> "<span class=ansi-#{colorName}>"
@@ -165,6 +169,11 @@ class CoffeeREPL
                 if @historyi > 0
                     @historyi += -1
                     @input.val @history[@historyi]
+
+            when 76, 108  # L, l
+                if e.ctrlKey
+                    e.preventDefault()
+                    @clear()
 
 coffeeConsoleHtmlFragment = '''
     <div class="container">
