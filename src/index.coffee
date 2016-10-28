@@ -1,10 +1,14 @@
 # Based on http://phosphorjs.github.io/examples/dockpanel/
 
+# To explicitly expose variables. (Acessible from the CoffeeConsole.)
+expose = window
+
 import { DockPanel }           from 'phosphor-dockpanel'
 import { CodeMirrorWidget }    from 'phosphor-codemirror'
 
 import { CoffeeConsoleWidget } from './coffeeconsole/coffeeconsole.coffee'
 
+import { amplify }             from 'node-amplifyjs/lib/amplify.core.js'
 import * as Birch              from 'birch-outline'
 
 import CodeMirror              from 'codemirror'
@@ -20,9 +24,9 @@ import 'codemirror/addon/fold/foldgutter.css'
 import 'codemirror/lib/codemirror.css'
 import './index.css'
 
-# To explicitly expose variables. (Acessible from the CoffeeConsole.)
-expose = window
+
 expose.birch = Birch
+expose.amplify = amplify
 
 #
 # Inject a method to load a file via AJAX.
@@ -37,6 +41,12 @@ CodeMirrorWidget.prototype.loadTarget = (target, callback) ->
            typeof callback is 'function'
             callback()
     xhr.send()
+
+# helper method to maintain sync between console and editor
+expose.setOutline = (contents) ->
+    expose.outline = new birch.Outline.createTaskPaperOutline(contents)
+    expose.outline.onDidEndChanges () ->
+        amplify.publish 'outline-changed', 'outline'
 
 #
 # The main application entry point.
@@ -57,12 +67,12 @@ main = () ->
         tabSize: 4
     })
     cmTaskpaper.loadTarget './todo.taskpaper', () ->
-        doc = cmTaskpaper.editor.doc
         contents = doc.getValue()
-        outline = new birch.Outline.createTaskPaperOutline(contents)
+        setOutline(contents)
 
-        expose.doc = doc
-        expose.outline = outline
+    expose.doc = cmTaskpaper.editor.doc
+    expose.doc.on 'change', () =>
+        amplify.publish 'outline-changed', 'doc'
 
     cmTaskpaper.title.text = 'Todo.taskpaper'
 
@@ -72,5 +82,10 @@ main = () ->
 
     window.onresize = () -> panel.update()
 
+    amplify.subscribe 'outline-changed', (source) ->
+        if source isnt 'doc' and expose.doc and expose.outline
+            expose.doc.setValue(outline.serialize())
+        if source isnt 'outline' and expose.doc and expose.outline
+            setOutline(expose.doc.getValue())
 
 window.onload = main
