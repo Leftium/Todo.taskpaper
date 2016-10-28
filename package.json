@@ -3,7 +3,9 @@
   "version": "0.0.1",
   "description": "Enhanced text editor for TaskPaper files.",
   "dependencies": {
+    "birch-outline": "^0.1.0",
     "coffee-script": "^1.11.1",
+    "json-loader": "^0.5.4",
     "phosphor-arrays": "^1.0.6",
     "phosphor-codemirror": "0.0.1",
     "phosphor-dockpanel": "^0.9.7",
