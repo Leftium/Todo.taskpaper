@@ -1,4 +1,4 @@
-
+var webpack = require("webpack");
 module.exports = {
   entry: './src/index.coffee',
   output: {
@@ -14,5 +14,9 @@ module.exports = {
       { test: /\.json$/, loader: "json-loader"},
       { test: /\.css$/, loader: 'style-loader!css-loader' },
     ]
-  }
+  },
+  plugins: [
+    // new webpack.ContextReplacementPlugin(/moment[\/\\]locale$/, /de|fr|hu/)
+    new webpack.IgnorePlugin(/^\.\/locale$/, /moment$/)
+  ]
 }
