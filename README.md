@@ -4,11 +4,10 @@ Enhanced text editor for [TaskPaper](https://www.taskpaper.com/) files
 
 ### Features
 
-- None, yet...
+- **Interactive console view with [birch-outline][birch-outline].** Accessed via embedded [CoffeeScript console][cs-repl].
 
 ### Planned features
 
-- Interactive programmatic access to taskpaper outlines (via [birch-outline](https://github.com/jessegrosjean/birch-outline) and [CoffeeScript REPL](http://larryng.github.io/coffeescript-repl/))
 - Dropbox Sync
 - Recurring tasks
 - Enhanced views
@@ -16,4 +15,5 @@ Enhanced text editor for [TaskPaper](https://www.taskpaper.com/) files
 	- Linkify and shorten URL's automatically  
 - Save in browser localStorage  
 
-
+[birch-outline]: //github.com/jessegrosjean/birch-outline
+[cs-repl]: //larryng.github.io/coffeescript-repl
