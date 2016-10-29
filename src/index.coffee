@@ -74,7 +74,7 @@ main = () ->
     expose.doc.on 'change', () =>
         amplify.publish 'outline-changed', 'doc'
 
-    cmTaskpaper.title.text = 'Todo.taskpaper'
+    cmTaskpaper.title.text = 'CodeMirror View'
 
     panel.insertLeft(cmTaskpaper)
     panel.insertBottom(coffeeconsole, cmTaskpaper)
