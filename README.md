@@ -1,6 +1,8 @@
 ## Todo.taskpaper
 
-Enhanced text editor for [TaskPaper](https://www.taskpaper.com/) files
+Enhanced text editor for [TaskPaper](https://www.taskpaper.com/) files.
+
+### Live Demo: [leftium.github.io/Todo.taskpaper](leftium.github.io/Todo.taskpaper)
 
 ### Features
 
