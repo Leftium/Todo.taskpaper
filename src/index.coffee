@@ -44,9 +44,12 @@ CodeMirrorWidget.prototype.loadTarget = (target, callback) ->
 
 # helper method to maintain sync between console and editor
 expose.setOutline = (contents) ->
+    expose.generation++
     expose.outline = new birch.Outline.createTaskPaperOutline(contents)
     expose.outline.onDidEndChanges () ->
-        amplify.publish 'outline-changed', 'outline'
+        expose.generation++
+        amplify.publish 'outline-changed', expose.generation, 'outline.onDidEndChanges'
+    amplify.publish 'outline-changed', expose.generation, 'setOutline'
 
 #
 # The main application entry point.
@@ -66,13 +69,16 @@ main = () ->
         gutters: ['CodeMirror-linenumbers', 'CodeMirror-foldgutter']
         tabSize: 4
     })
-    cmTaskpaper.loadTarget './todo.taskpaper', () ->
-        contents = doc.getValue()
-        setOutline(contents)
 
     expose.doc = cmTaskpaper.editor.doc
+    expose.generation = expose.doc.changeGeneration()
     expose.doc.on 'change', () =>
-        amplify.publish 'outline-changed', 'doc'
+        amplify.publish 'outline-changed', doc.changeGeneration(), 'doc.change'
+
+    cmTaskpaper.loadTarget './todo.taskpaper', () ->
+        contents = doc.getValue()
+        expose.generation = expose.doc.changeGeneration()
+        setOutline(contents)
 
     cmTaskpaper.title.text = 'CodeMirror View'
 
@@ -82,10 +88,11 @@ main = () ->
 
     window.onresize = () -> panel.update()
 
-    amplify.subscribe 'outline-changed', (source) ->
-        if source isnt 'doc' and expose.doc and expose.outline
+    amplify.subscribe 'outline-changed', (generation, source) ->
+        # console.log 'outline-changed', generation, source
+        if not doc.isClean(generation)
             expose.doc.setValue(outline.serialize())
-        if source isnt 'outline' and expose.doc and expose.outline
+        if generation > expose.generation and expose.doc and expose.outline
             setOutline(expose.doc.getValue())
 
 window.onload = main
