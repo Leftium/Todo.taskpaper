@@ -3,7 +3,7 @@
 Enhanced text editor for [TaskPaper](http://www.taskpaper.com/) files that runs in your browser.
 
 
-### Live Demo hosted here: [leftium.github.io/Todo.taskpaper](http://leftium.github.io/Todo.taskpaper)
+### Click to try live demo in your browser: [todo-taskpaper.leftium.com](http://todo-taskpaper.leftium.com)
 
 ![Screenshot](http://leftium.github.io/Todo.taskpaper/Todo.taskpaper.screenshot.png)
 
