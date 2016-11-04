@@ -3,6 +3,9 @@
 # To explicitly expose variables. (Acessible from the CoffeeConsole.)
 expose = window
 
+# To temporarily expose variables during development.
+debug = window
+
 import { DockPanel }           from 'phosphor-dockpanel'
 import { CodeMirrorWidget }    from 'phosphor-codemirror'
 
@@ -91,6 +94,8 @@ main = () ->
 
     expose.birch = birch
     expose.amplify = amplify
+
+    debug.coffeeconsole = coffeeconsole
 
 window.onload = main
 
