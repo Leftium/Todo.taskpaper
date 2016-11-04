@@ -55,7 +55,7 @@ class CoffeeREPL
         s = args.join(' ') or ' '
         o = @output[0].innerHTML + s + '\n'
         @output[0].innerHTML = o.split('\n')[-@settings.maxLines...].join('\n')
-        undefined
+        @prompt[0].scrollIntoView()
 
     processSaved: =>
         try
@@ -234,7 +234,7 @@ export class CoffeeConsoleWidget extends Widget
 
 
     scrollToBottom: () =>
-        window.scrollTo 0, @$prompt[0].offsetTop
+        @$prompt[0].scrollIntoView()
 
 
     init:() ->
