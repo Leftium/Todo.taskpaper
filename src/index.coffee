@@ -6,16 +6,17 @@ expose = window
 # To temporarily expose variables during development.
 debug = window
 
-import { DockPanel }           from 'phosphor-dockpanel'
-import { CodeMirrorWidget }    from 'phosphor-codemirror'
+import { DockPanel }                 from 'phosphor-dockpanel'
+import { CodeMirrorWidget }          from 'phosphor-codemirror'
 
-import { CoffeeConsoleWidget } from './coffeeconsole/coffeeconsole.coffee'
+import { CoffeeConsoleWidget }       from './coffeeconsole/coffeeconsole.coffee'
 
-import { amplify }             from 'node-amplifyjs/lib/amplify.core.js'
-import * as birch              from 'birch-outline'
+import { amplify }                   from 'node-amplifyjs/lib/amplify.core.js'
 import { parse as parseQueryString } from 'querystring'
 
-import CodeMirror              from 'codemirror'
+import * as birch                    from 'birch-outline'
+
+import CodeMirror                    from 'codemirror'
 
 import 'codemirror/mode/coffeescript/coffeescript'
 import 'codemirror/mode/css/css'
