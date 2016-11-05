@@ -99,6 +99,7 @@ main = () ->
     path = hashKeys?.state or location.hash[1...].split('&')[0]
 
     if script = hashKeys.coffee or hashKeys.cs
+        expose.birch = birch
         expose.outline = outline
         log 'CoffeeScript detected in hash:'
 
@@ -123,7 +124,6 @@ main = () ->
     expose.doc = doc
     expose.outline = outline
 
-    expose.birch = birch
     expose.amplify = amplify
 
     debug.coffeeconsole = coffeeconsole
