@@ -130,7 +130,6 @@ main = () ->
     # User chose not to give access to Dropbox account
     dropboxAccessDenied = hashKeys.error is 'access_denied'
     if dropboxAccessDenied
-        location.hash = 'BLANK'
         path = 'BLANK'
         log """
 
@@ -150,7 +149,56 @@ main = () ->
             amplify.publish 'outline-ready'
         when 'BLANK', 'NEW', 'DEMO'
             amplify.publish 'outline-ready'
+        else  # Dropbox
+            options =
+                path: path
+            dropboxApiReady = not dropboxAccessDenied
+            if dropboxApiReady
+                p1 = dbx.filesGetMetadata options
+                p1.then (metaData) =>
+                    # source: http://stackoverflow.com/questions/190852
+                    fileExtension = (fname) ->
+                        fname.substr((~-fname.lastIndexOf(".") >>> 0) + 2)
 
+                    if metaData['.tag'] is 'folder'
+                        log "ERROR: #{path} is a folder. (Not supported)"
+                        location.hash = 'BLANK'
+                        dropboxApiReady = false
+
+                    textFileExtensions = ['', 'txt', 'taskpaper', 'ft']
+                    fileExtension = fileExtension(metaData.name).toLowerCase()
+                    if fileExtension not in textFileExtensions
+                        log "ERROR: File #{path} is not a text file (based on file extension)."
+                        spy.fileExtension = fileExtension
+                        spy.name = metaData.name
+                        dropboxApiReady = false
+
+                    if dropboxApiReady
+                        p2 = dbx.filesDownload options
+
+                        p2.then (fileData) =>
+                            reader = new FileReader()
+
+                            reader.addEventListener 'loadend', () ->
+                                # reader.result contains the contents of blob as a typed array
+                                stringResult = new TextDecoder('utf8').decode(reader.result)
+                                doc.setValue(stringResult)
+
+                            reader.readAsArrayBuffer(fileData.fileBlob)
+
+                p1.catch (error) =>
+                    slog error
+                    spy.error = error
+                    switch error.status
+                        when 409  # Path not found
+                            log "ERROR: File #{path} not found on Dropbox."
+                        else
+                            if dbx.accessToken?
+                                log "ERROR: #{error.error} (Status: #{error.status})"
+                            else
+                                slog 'Redirect:'
+                                slog authenticationUrl
+                                window.location = authenticationUrl
 
 
 
