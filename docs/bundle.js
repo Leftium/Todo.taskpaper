@@ -156,6 +156,7 @@
 	  hashKeys = (0, _querystring.parse)(location.hash.slice(1));
 	  path = (hashKeys != null ? hashKeys.state : void 0) || location.hash.slice(1).split('&')[0];
 	  if (script = hashKeys.coffee || hashKeys.cs) {
+	    expose.birch = birch;
 	    expose.outline = outline;
 	    log('CoffeeScript detected in hash:');
 	    script = script.replace(/^>/, '');
@@ -190,7 +191,6 @@
 	  }
 	  expose.doc = doc;
 	  expose.outline = outline;
-	  expose.birch = birch;
 	  expose.amplify = _amplifyCore.amplify;
 	  return debug.coffeeconsole = coffeeconsole;
 	};
