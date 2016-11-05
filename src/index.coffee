@@ -3,8 +3,9 @@
 # To explicitly expose variables. (Acessible from the CoffeeConsole.)
 expose = window
 
-# To temporarily expose variables during development.
-debug = window
+# To temporarily introspect variables during development.
+spy = window
+slog = console.log # spy + log
 
 import { DockPanel }                 from 'phosphor-dockpanel'
 import { CodeMirrorWidget }          from 'phosphor-codemirror'
@@ -127,7 +128,8 @@ main = () ->
 
     expose.amplify = amplify
 
-    debug.coffeeconsole = coffeeconsole
+
+    spy.coffeeconsole = coffeeconsole
 
 window.onload = main
 
