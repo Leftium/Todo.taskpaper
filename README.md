@@ -3,7 +3,19 @@
 Enhanced text editor for [TaskPaper](http://www.taskpaper.com/) files that runs in your browser.
 
 
-### Try a live demo in your browser: [todo-taskpaper.leftium.com](http://todo-taskpaper.leftium.com)
+### Try a live demo in your browser: [leftium.github.io/Todo.taskpaper](https://leftium.github.io/Todo.taskpaper/)
+
+Different URLS result in different behavior:
+
+https://leftium.github.io/Todo.taskpaper
+
+- [leftium.github.io/Todo.taskpaper/#/public/Top+Secret.txt](https://leftium.github.io/Todo.taskpaper/#/public/Top+Secret.txt) Opens text files from *your* Dropbox (when the hash is a file path starting with '/'). 
+- [leftium.github.io/Todo.taskpaper/#BLANK](https://leftium.github.io/Todo.taskpaper/#BLANK) Opens a blank outline.
+- [leftium.github.io/Todo.taskpaper/#DEMO&cs=%3E%20s%20...alert%20s%3B%20s](https://leftium.github.io/Todo.taskpaper/#DEMO&cs=%3E%20s%20%3D%20%22I%27m%20CoffeeScript%20from%20the%20Todo.taskpaper%20URL%20hash!%22%0A%3E%20alert%20s%3B%20s) Run/share CoffeeScript [encoded](http://meyerweb.com/eric/tools/dencoder/) in the URL.
+- [leftium.github.io/Todo.taskpaper](https://leftium.github.io/Todo.taskpaper) By default, opens an introductory welcome.taskpaper file.
+
+
+
 
 ![Screenshot](http://leftium.github.io/Todo.taskpaper/Todo.taskpaper.screenshot.png)
 
@@ -24,6 +36,8 @@ Enhanced text editor for [TaskPaper](http://www.taskpaper.com/) files that runs 
 - **Basic text editor.** With support for folding.
 - **Interactive console with [birch-outline][birch-outline].** Accessed via embedded [CoffeeScript console][cs-repl].
 - **Synchronization between birch-outline and the text editor.** Instant and automatic!
+- **Load files from Dropbox.** Two-way sync coming soon...
+- **Share snippets of CoffeeScript** This [issue](https://github.com/jessegrosjean/birch-outline/issues/3) for birch-outline links to a live reproduction.  
 
 ### Planned Features
 
