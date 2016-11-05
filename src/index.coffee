@@ -155,7 +155,14 @@ main = () ->
     expose.amplify = amplify
 
 
+    spy.parseQueryString = parseQueryString
+    spy.Dropbox = Dropbox
+
     spy.coffeeconsole = coffeeconsole
+    spy.path = path
+    spy.dbx = dbx
+    spy.authenticationUrl = authenticationUrl
+    spy.dropboxAccessDenied = dropboxAccessDenied
 
 window.onload = main
 
