@@ -18,6 +18,7 @@ import { parse as parseQueryString } from 'querystring'
 import * as birch                    from 'birch-outline'
 
 import CodeMirror                    from 'codemirror'
+import Dropbox                       from 'dropbox'
 
 import 'codemirror/mode/coffeescript/coffeescript'
 import 'codemirror/mode/css/css'
@@ -97,6 +98,16 @@ main = () ->
 
     hashKeys = parseQueryString(location.hash[1...])
 
+    # Initialize access token, preferring token in URL query string
+    accessToken = hashKeys.access_token
+    accessToken = accessToken || localStorage.accessToken
+    # Cache value for future use
+    if accessToken?
+        localStorage.accessToken = accessToken
+
+    dbx = new Dropbox options =
+        clientId: '4lvqqk59oy9o23n'
+        accessToken: accessToken
 
     path = hashKeys?.state or location.hash[1...].split('&')[0]
 
@@ -121,6 +132,21 @@ main = () ->
         when 'BLANK', 'NEW', 'DEMO'
             amplify.publish 'outline-ready'
         else
+            authenticationUrl = dbx.getAuthenticationUrl(location.href.split("#")[0], path)
+            authenticationLink = "<a href='#{authenticationUrl}'>#{authenticationUrl}</a>"
+
+            # User chose not to give access to Dropbox account
+            dropboxAccessDenied = hashKeys.error is 'access_denied'
+            if dropboxAccessDenied
+                log """
+                    Unable to open #{path}:
+                    You chose not to give access to your Dropbox account.
+
+                    If you change your mind, please follow this link:
+                    #{authenticationLink}.
+
+                    """
+                location.hash = 'BLANK'
             if path is '/' or path is ''
                 loadDefault()
     expose.doc = doc
