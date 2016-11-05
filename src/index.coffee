@@ -94,7 +94,6 @@ main = () ->
     loadDefault = () ->
         cmTaskpaper.loadTarget './todo.taskpaper', () ->
             contents = doc.getValue()
-            amplify.publish 'outline-ready'
 
     hashKeys = parseQueryString(location.hash[1...])
 
@@ -125,40 +124,47 @@ main = () ->
                 $$.addToSaved(line)
                 $$.processSaved(line)
 
+    authenticationUrl = dbx.getAuthenticationUrl(location.href.split("#")[0], path or 'WELCOME')
+    authenticationLink = "<a href='#{authenticationUrl}'>#{authenticationUrl}</a>"
 
+    # User chose not to give access to Dropbox account
+    dropboxAccessDenied = hashKeys.error is 'access_denied'
+    if dropboxAccessDenied
+        location.hash = 'BLANK'
+        path = 'BLANK'
+        log """
+
+            ATTENTION: You chose not to give access to your Dropbox account.
+            To give access later, just follow this link:
+            #{authenticationLink}
+
+            """
+
+    if path is '/' or path is ''
+        path = 'WELCOME'
+
+    location.hash = path
     switch path
         when 'WELCOME'
             loadDefault()
+            amplify.publish 'outline-ready'
         when 'BLANK', 'NEW', 'DEMO'
             amplify.publish 'outline-ready'
-        else
-            authenticationUrl = dbx.getAuthenticationUrl(location.href.split("#")[0], path)
-            authenticationLink = "<a href='#{authenticationUrl}'>#{authenticationUrl}</a>"
 
-            # User chose not to give access to Dropbox account
-            dropboxAccessDenied = hashKeys.error is 'access_denied'
-            if dropboxAccessDenied
-                log """
-                    Unable to open #{path}:
-                    You chose not to give access to your Dropbox account.
 
-                    If you change your mind, please follow this link:
-                    #{authenticationLink}.
 
-                    """
-                location.hash = 'BLANK'
-            if path is '/' or path is ''
-                loadDefault()
+
+
     expose.doc = doc
     expose.outline = outline
 
     expose.amplify = amplify
 
-
     spy.parseQueryString = parseQueryString
     spy.Dropbox = Dropbox
 
     spy.coffeeconsole = coffeeconsole
+    spy.hashKeys = hashKeys
     spy.path = path
     spy.dbx = dbx
     spy.authenticationUrl = authenticationUrl
