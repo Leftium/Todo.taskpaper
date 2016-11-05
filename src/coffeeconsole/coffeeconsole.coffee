@@ -105,6 +105,8 @@ class CoffeeREPL
         for key,value of ansi2tag
             output = output.replace(///\u001b\[#{key}m///g, value)
 
+        output = output.replace(/^|\n/g, '$&      < ')
+
         @print output
 
     setPrompt: =>
@@ -254,6 +256,10 @@ export class CoffeeConsoleWidget extends Widget
         # replace console.log
         console.log = (args...) =>
             @SAVED_CONSOLE_LOG.apply console, args
+            @repl.print args...
+
+        # log only to CoffeeConsole
+        window.log = (args...) =>
             @repl.print args...
 
         # expose repl as $$

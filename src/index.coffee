@@ -13,6 +13,7 @@ import { CoffeeConsoleWidget } from './coffeeconsole/coffeeconsole.coffee'
 
 import { amplify }             from 'node-amplifyjs/lib/amplify.core.js'
 import * as birch              from 'birch-outline'
+import { parse as parseQueryString } from 'querystring'
 
 import CodeMirror              from 'codemirror'
 
@@ -65,8 +66,6 @@ main = () ->
     doc = cmTaskpaper.editor.doc
     doc.on 'change', () =>
         amplify.publish 'outline-changed', doc.changeGeneration(), 'doc.change'
-    cmTaskpaper.loadTarget './todo.taskpaper', () ->
-        contents = doc.getValue()
 
     # Initialize outline
     outline = new birch.Outline.createTaskPaperOutline(doc.getValue())
@@ -89,6 +88,38 @@ main = () ->
         if generation > outline.generation # and expose.doc and expose.outline
             outline.reloadSerialization(doc.getValue())
 
+    loadDefault = () ->
+        cmTaskpaper.loadTarget './todo.taskpaper', () ->
+            contents = doc.getValue()
+            amplify.publish 'outline-ready'
+
+    hashKeys = parseQueryString(location.hash[1...])
+
+
+    path = hashKeys?.state or location.hash[1...].split('&')[0]
+
+    if script = hashKeys.coffee or hashKeys.cs
+        expose.outline = outline
+        log 'CoffeeScript detected in hash:'
+
+        script = script.replace(/^>/, '')
+        lines = script.split('\n>')
+
+        amplify.subscribe 'outline-ready', () =>
+            for line in lines
+                log "      > #{line}"
+                $$.addToSaved(line)
+                $$.processSaved(line)
+
+
+    switch path
+        when 'WELCOME'
+            loadDefault()
+        when 'BLANK', 'NEW', 'DEMO'
+            amplify.publish 'outline-ready'
+        else
+            if path is '/' or path is ''
+                loadDefault()
     expose.doc = doc
     expose.outline = outline
 
