@@ -18,7 +18,8 @@ import { parse as parseQueryString } from 'querystring'
 import * as birch                    from 'birch-outline'
 
 import CodeMirror                    from 'codemirror'
-import Dropbox                       from 'dropbox'
+import * as Dbx                      from 'dropbox'
+spy.Dbx = Dbx
 
 import 'codemirror/mode/coffeescript/coffeescript'
 import 'codemirror/mode/css/css'
@@ -104,7 +105,7 @@ main = () ->
     if accessToken?
         localStorage.accessToken = accessToken
 
-    dbx = new Dropbox options =
+    dbx = new Dbx.default
         clientId: '4lvqqk59oy9o23n'
         accessToken: accessToken
 
@@ -142,6 +143,16 @@ main = () ->
     if path is '/' or path is ''
         path = 'WELCOME'
 
+    openDropboxChooserLink = 
+        '<a onclick="launchDropBoxChooser()" >Open Dropbox Chooser</a>'
+    expose.launchDropBoxChooser = () ->
+        slog 'launchDropBoxChooser'
+        Dropbox.choose options =
+            extensions: ['text', '.taskpaper', '.txt', '.ft']
+            success: (files) ->
+                slog files
+
+
     location.hash = path
     switch path
         when 'WELCOME'
@@ -149,6 +160,15 @@ main = () ->
             amplify.publish 'outline-ready'
         when 'BLANK', 'NEW', 'DEMO'
             amplify.publish 'outline-ready'
+        when 'CHOOSE'
+            try
+                launchDropBoxChooser()
+            catch e
+                log """
+                    ATTENTION: Dropbox chooser was blocked by the browser.
+                    Click this link to launch manually:
+                    #{openDropboxChooserLink}
+                    """
         else  # Dropbox
             options =
                 path: path
@@ -209,7 +229,6 @@ main = () ->
     expose.amplify = amplify
 
     spy.parseQueryString = parseQueryString
-    spy.Dropbox = Dropbox
 
     spy.coffeeconsole = coffeeconsole
     spy.hashKeys = hashKeys
