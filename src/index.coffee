@@ -32,7 +32,6 @@ import 'codemirror/addon/fold/foldgutter.css'
 import 'codemirror/lib/codemirror.css'
 import './index.css'
 
-
 #
 # Inject a method to load a file via AJAX.
 #
@@ -125,7 +124,7 @@ main = () ->
                 $$.addToSaved(line)
                 $$.processSaved(line)
 
-    authenticationUrl = dbx.getAuthenticationUrl(location.href.split("#")[0], path or 'WELCOME')
+    authenticationUrl = dbx.getAuthenticationUrl(location.href.split("#")[0], path)
     authenticationLink = "<a href='#{authenticationUrl}'>#{authenticationUrl}</a>"
 
     # User chose not to give access to Dropbox account
@@ -150,10 +149,16 @@ main = () ->
         Dropbox.choose options =
             extensions: ['text', '.taskpaper', '.txt', '.ft']
             success: (files) ->
-                slog files
+                p1 = dbx.sharingGetSharedLinkFile options =
+                    url: files[0].link
+                p1.then (fileData) ->
+                    window.location.hash = fileData.path_lower
+                p1.catch (error) ->
+                    slog 'Error @sharingGetSharedLinkFile'
+                    slog error
 
+    history.pushState(null, null, "##{path}")
 
-    location.hash = path
     switch path
         when 'WELCOME'
             loadDefault()
@@ -161,6 +166,9 @@ main = () ->
         when 'BLANK', 'NEW', 'DEMO'
             amplify.publish 'outline-ready'
         when 'CHOOSE'
+            # Get access token first so we can convert the link to a path later
+            if not dbx.accessToken
+                window.location = dbx.getAuthenticationUrl(location.href.split("#")[0], 'CHOOSE')
             try
                 launchDropBoxChooser()
             catch e
@@ -182,13 +190,17 @@ main = () ->
 
                     if metaData['.tag'] is 'folder'
                         log "ERROR: #{path} is a folder. (Not supported)"
-                        location.hash = 'BLANK'
+                        history.pushState(null, null, "#BLANK")
+
+
                         dropboxApiReady = false
 
                     textFileExtensions = ['', 'txt', 'taskpaper', 'ft']
                     fileExtension = fileExtension(metaData.name).toLowerCase()
                     if fileExtension not in textFileExtensions
                         log "ERROR: File #{path} is not a text file (based on file extension)."
+                        history.pushState(null, null, "#BLANK")
+
                         spy.fileExtension = fileExtension
                         spy.name = metaData.name
                         dropboxApiReady = false
@@ -212,9 +224,11 @@ main = () ->
                     switch error.status
                         when 409  # Path not found
                             log "ERROR: File #{path} not found on Dropbox."
+                            history.pushState(null, null, "#BLANK")
                         else
                             if dbx.accessToken?
                                 log "ERROR: #{error.error} (Status: #{error.status})"
+                                history.pushState(null, null, "#BLANK")
                             else
                                 slog 'Redirect:'
                                 slog authenticationUrl
@@ -238,4 +252,13 @@ main = () ->
     spy.dropboxAccessDenied = dropboxAccessDenied
 
 window.onload = main
+
+window.onhashchange = () ->
+    slog "onhashchange: #{location.hash}"
+    if window.changeOnlyHash
+        slog 'skip reload'
+    else
+        slog 'reloading...'
+        window.location.reload()
+
 

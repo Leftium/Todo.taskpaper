@@ -293,9 +293,15 @@ export class CoffeeConsoleWidget extends Widget
 
         # print header
         @repl.print """
-          # CoffeeScript v#{CoffeeScript.VERSION} REPL
-          # <a href="https://github.com/Leftium/todo.taskpaper" target="_blank">https://github.com/Leftium/todo.taskpaper</a>
-          #
-          # help() for features and tips.
+          | CoffeeScript v#{CoffeeScript.VERSION}
+          | <a href="https://github.com/Leftium/todo.taskpaper" target="_blank">https://github.com/Leftium/todo.taskpaper</a>
+          |
+          | Quick Links:
+          | <a href="#WELCOME">#WELCOME</a> - Open sample with quick welcome/tutorial.
+          | <a onclick="launchDropBoxChooser()" >#CHOOSE</a>  - Choose a file from your Dropbox.
+          | <a href="#NEW" >#NEW</a>     - Open a new, blank document.
+          |
+          | help() for features and tips.
+ 
           """
 
