@@ -8,8 +8,8 @@ Enhanced text editor for [TaskPaper](http://www.taskpaper.com/) files that runs 
 Different URL hashes result in different behavior:
 
 - [#WELCOME][WELCOME] By default, opens sample welcome.taskpaper with more information about Todo.taskpaper.
-- [#CHOOSE][CHOOSE] Choose which file to open from your Dropbox. (Click the link if your browser blocks pop-ups.)
-- [#BLANK][BLANK] Opens a blank outline.
+- [#CHOOSE][CHOOSE] Dropbox chooser. (Click the link in the CoffeeConsole if your browser blocks pop-ups.)
+- [#BLANK][BLANK] Opens a new, blank outline.
 - [#DEMO][DEMO] Run CoffeeScript [encoded][encoded] in the URL. Share with your friends/colleagues.
 
 [WELCOME]: https://leftium.github.io/Todo.taskpaper
