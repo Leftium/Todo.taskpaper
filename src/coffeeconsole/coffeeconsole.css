@@ -1,17 +1,41 @@
+/* solarized color scheme: http://ethanschoonover.com/solarized
+
+base03    #002b36  background
+base02    #073642  background highlight
+base01    #586e75  comments, secondary
+base00    #657b83
+base0     #839496  text, primary
+base1     #93a1a1  emphasis
+base2     #eee8d5
+base3     #fdf6e3
+
+yellow    #b58900
+orange    #cb4b16
+red       #dc322f
+magenta   #d33682
+violet    #6c71c4
+blue      #268bd2
+cyan      #2aa198
+green     #859900
+
+*/
 .CoffeeConsoleWidget {
-    background-color: #222;
-    color: #fff;
+    background-color: #002b36;
+    color: #839496;
     font-size: 14px;
-    font-family: DejaVu Sans Mono, monospace;
+    font-family: Consolas, Courier New, DejaVu Sans Mono, monospace;
     overflow-y: scroll;
 }
 
 .CoffeeConsoleWidget a {
-    color: #fff;
-    text-decoration: underline;
+    color: #839496;
+    text-decoration: none;
+    border-bottom: 1px solid #839496;
 }
 .CoffeeConsoleWidget a:hover {
-    text-decoration: underline;
+    color: #eee8d5;
+    text-decoration: none;
+    border-bottom: 1px solid #839496;
 }
 .CoffeeConsoleWidget pre {
     margin: 0;
@@ -26,6 +50,7 @@
 }
 .CoffeeConsoleWidget .output {
     word-wrap: break-word;
+    white-space: pre-wrap;
 }
 .CoffeeConsoleWidget .inputdiv {
     width: 100%;
@@ -41,8 +66,8 @@
 .CoffeeConsoleWidget .input {
     border: none;
     outline: none;
-    background-color: #222;
-    color: #fff;
+    background-color: #002b36;
+    color: #839496;
     font: inherit;
     margin: 0;
     padding: 0;
@@ -58,27 +83,27 @@
     margin: 0;
     word-wrap: break-word;
 }
-.CoffeeConsoleWidget .s_special { color: #4ff }
-.CoffeeConsoleWidget .s_number { color: #ff4 }
-.CoffeeConsoleWidget .s_boolean { color: #ff4 }
-.CoffeeConsoleWidget .s_undefined { color: #999 }
+.CoffeeConsoleWidget .s_special { color: #2aa198 }
+.CoffeeConsoleWidget .s_number { color: #b58900 }
+.CoffeeConsoleWidget .s_boolean { color: #b58900 }
+.CoffeeConsoleWidget .s_undefined { font-style: italic  }
 .CoffeeConsoleWidget .s_null { font-weight: bold }
-.CoffeeConsoleWidget .s_string { color: #4f4 }
-.CoffeeConsoleWidget .s_date { color: #f4f }
-.CoffeeConsoleWidget .s_regexp { color: #f44 }
+.CoffeeConsoleWidget .s_string { color: #859900 }
+.CoffeeConsoleWidget .s_date { color: #859900 }
+.CoffeeConsoleWidget .s_regexp { color: #dc322f }
 
 .CoffeeConsoleWidget .ansi-bold      { font-weight: bold  }
 .CoffeeConsoleWidget .ansi-italic    { font-style: italic  }
 .CoffeeConsoleWidget .ansi-underline { font-style: underline }
 .CoffeeConsoleWidget .ansi-inverse   { color: black; background-color: white }
-.CoffeeConsoleWidget .ansi-white     { color: white }
-.CoffeeConsoleWidget .ansi-grey      { color: grey }
-.CoffeeConsoleWidget .ansi-black     { color: black }
-.CoffeeConsoleWidget .ansi-blue      { color: blue }
-.CoffeeConsoleWidget .ansi-cyan      { color: cyan }
-.CoffeeConsoleWidget .ansi-green     { color: green }
-.CoffeeConsoleWidget .ansi-magenta   { color: magenta }
-.CoffeeConsoleWidget .ansi-red       { color: red }
-.CoffeeConsoleWidget .ansi-yellow    { color: yellow }
+.CoffeeConsoleWidget .ansi-white     { color: rgb(238, 232, 213) }
+.CoffeeConsoleWidget .ansi-grey      { color: rgb(183, 174, 156) }
+.CoffeeConsoleWidget .ansi-black     { color: rgb(  7,  54,  66) }
+.CoffeeConsoleWidget .ansi-blue      { color: rgb( 38, 139, 210) }
+.CoffeeConsoleWidget .ansi-cyan      { color: rgb( 42, 161, 152) }
+.CoffeeConsoleWidget .ansi-green     { color: rgb(133, 153,   0) }
+.CoffeeConsoleWidget .ansi-magenta   { color: rgb(211,  54, 130) }
+.CoffeeConsoleWidget .ansi-red       { color: rgb(220,  50,  47) }
+.CoffeeConsoleWidget .ansi-yellow    { color: rgb(255, 194,   2) }
 
 
