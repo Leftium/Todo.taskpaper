@@ -66,7 +66,7 @@
 
 	var _dropbox = __webpack_require__(169);
 
-	var _dropbox2 = _interopRequireDefault(_dropbox);
+	var Dbx = _interopRequireWildcard(_dropbox);
 
 	__webpack_require__(187);
 
@@ -104,6 +104,8 @@
 
 	slog = console.log;
 
+	spy.Dbx = Dbx;
+
 	_phosphorCodemirror.CodeMirrorWidget.prototype.loadTarget = function (target, callback) {
 	  var doc, xhr;
 	  doc = this._editor.getDoc();
@@ -119,7 +121,7 @@
 	};
 
 	main = function main() {
-	  var accessToken, authenticationLink, authenticationUrl, cmTaskpaper, coffeeconsole, dbx, doc, dropboxAccessDenied, dropboxApiReady, hashKeys, lines, loadDefault, options, outline, p1, panel, path, script;
+	  var accessToken, authenticationLink, authenticationUrl, cmTaskpaper, coffeeconsole, dbx, doc, dropboxAccessDenied, dropboxApiReady, e, hashKeys, lines, loadDefault, openDropboxChooserLink, options, outline, p1, panel, path, script;
 	  panel = new _phosphorDockpanel.DockPanel();
 	  panel.id = 'main';
 	  coffeeconsole = new _coffeeconsole.CoffeeConsoleWidget();
@@ -172,7 +174,7 @@
 	  if (accessToken != null) {
 	    localStorage.accessToken = accessToken;
 	  }
-	  dbx = new _dropbox2.default(options = {
+	  dbx = new Dbx["default"]({
 	    clientId: '4lvqqk59oy9o23n',
 	    accessToken: accessToken
 	  });
@@ -197,7 +199,7 @@
 	      };
 	    }(this));
 	  }
-	  authenticationUrl = dbx.getAuthenticationUrl(location.href.split("#")[0], path || 'WELCOME');
+	  authenticationUrl = dbx.getAuthenticationUrl(location.href.split("#")[0], path);
 	  authenticationLink = "<a href='" + authenticationUrl + "'>" + authenticationUrl + "</a>";
 	  dropboxAccessDenied = hashKeys.error === 'access_denied';
 	  if (dropboxAccessDenied) {
@@ -207,7 +209,28 @@
 	  if (path === '/' || path === '') {
 	    path = 'WELCOME';
 	  }
-	  location.hash = path;
+	  openDropboxChooserLink = '<a onclick="launchDropBoxChooser()" >Open Dropbox Chooser</a>';
+	  expose.launchDropBoxChooser = function () {
+	    var options;
+	    slog('launchDropBoxChooser');
+	    return Dropbox.choose(options = {
+	      extensions: ['text', '.taskpaper', '.txt', '.ft'],
+	      success: function success(files) {
+	        var p1;
+	        p1 = dbx.sharingGetSharedLinkFile(options = {
+	          url: files[0].link
+	        });
+	        p1.then(function (fileData) {
+	          return window.location.hash = fileData.path_lower;
+	        });
+	        return p1["catch"](function (error) {
+	          slog('Error @sharingGetSharedLinkFile');
+	          return slog(error);
+	        });
+	      }
+	    });
+	  };
+	  history.pushState(null, null, "#" + path);
 	  switch (path) {
 	    case 'WELCOME':
 	      loadDefault();
@@ -217,6 +240,17 @@
 	    case 'NEW':
 	    case 'DEMO':
 	      _amplifyCore.amplify.publish('outline-ready');
+	      break;
+	    case 'CHOOSE':
+	      if (!dbx.accessToken) {
+	        window.location = dbx.getAuthenticationUrl(location.href.split("#")[0], 'CHOOSE');
+	      }
+	      try {
+	        launchDropBoxChooser();
+	      } catch (error1) {
+	        e = error1;
+	        log("ATTENTION: Dropbox chooser was blocked by the browser.\nClick this link to launch manually:\n" + openDropboxChooserLink);
+	      }
 	      break;
 	    default:
 	      options = {
@@ -233,13 +267,14 @@
 	            };
 	            if (metaData['.tag'] === 'folder') {
 	              log("ERROR: " + path + " is a folder. (Not supported)");
-	              location.hash = 'BLANK';
+	              history.pushState(null, null, "#BLANK");
 	              dropboxApiReady = false;
 	            }
 	            textFileExtensions = ['', 'txt', 'taskpaper', 'ft'];
 	            fileExtension = fileExtension(metaData.name).toLowerCase();
 	            if (indexOf.call(textFileExtensions, fileExtension) < 0) {
 	              log("ERROR: File " + path + " is not a text file (based on file extension).");
+	              history.pushState(null, null, "#BLANK");
 	              spy.fileExtension = fileExtension;
 	              spy.name = metaData.name;
 	              dropboxApiReady = false;
@@ -265,10 +300,12 @@
 	            spy.error = error;
 	            switch (error.status) {
 	              case 409:
-	                return log("ERROR: File " + path + " not found on Dropbox.");
+	                log("ERROR: File " + path + " not found on Dropbox.");
+	                return history.pushState(null, null, "#BLANK");
 	              default:
 	                if (dbx.accessToken != null) {
-	                  return log("ERROR: " + error.error + " (Status: " + error.status + ")");
+	                  log("ERROR: " + error.error + " (Status: " + error.status + ")");
+	                  return history.pushState(null, null, "#BLANK");
 	                } else {
 	                  slog('Redirect:');
 	                  slog(authenticationUrl);
@@ -283,7 +320,6 @@
 	  expose.outline = outline;
 	  expose.amplify = _amplifyCore.amplify;
 	  spy.parseQueryString = _querystring.parse;
-	  spy.Dropbox = _dropbox2.default;
 	  spy.coffeeconsole = coffeeconsole;
 	  spy.hashKeys = hashKeys;
 	  spy.path = path;
@@ -293,6 +329,16 @@
 	};
 
 	window.onload = main;
+
+	window.onhashchange = function () {
+	  slog("onhashchange: " + location.hash);
+	  if (window.changeOnlyHash) {
+	    return slog('skip reload');
+	  } else {
+	    slog('reloading...');
+	    return window.location.reload();
+	  }
+	};
 
 /***/ },
 /* 1 */
@@ -20988,7 +21034,7 @@
 	        return _this.repl.print("\n<strong>Features</strong>\n<strong>========</strong>\n+ <strong>Esc</strong> toggles multiline mode.\n+ <strong>Up/Down arrow</strong> flips through line history.\n+ <strong>" + $$.settings.lastVariable + "</strong> stores the last returned value.\n+ Access the internals of this console through <strong>$$</strong>.\n+ <strong>$$.clear()</strong> clears this console.\n\n<strong>Settings</strong>\n<strong>========</strong>\nYou can modify the behavior of this REPL by altering <strong>$$.settings</strong>:\n\n+ <strong>lastVariable</strong> (" + _this.repl.settings.lastVariable + "): variable name in which last returned value is stored\n+ <strong>maxLines</strong> (" + _this.repl.settings.maxLines + "): max line count of this console\n+ <strong>maxDepth</strong> (" + _this.repl.settings.maxDepth + "): max depth in which to inspect outputted object\n+ <strong>showHidden</strong> (" + _this.repl.settings.showHidden + "): flag to output hidden (not enumerable) properties of objects\n+ <strong>colorize</strong> (" + _this.repl.settings.colorize + "): flag to colorize output (set to false if REPL is slow)\n\n<strong>$$.saveSettings()</strong> will save settings to localStorage.\n<strong>$$.resetSettings()</strong> will reset settings to default.");
 	      };
 	    }(this);
-	    return this.repl.print("# CoffeeScript v" + _coffeeScript2.default.VERSION + " REPL\n# <a href=\"https://github.com/Leftium/todo.taskpaper\" target=\"_blank\">https://github.com/Leftium/todo.taskpaper</a>\n#\n# help() for features and tips.");
+	    return this.repl.print("| CoffeeScript v" + _coffeeScript2.default.VERSION + "\n| <a href=\"https://github.com/Leftium/todo.taskpaper\" target=\"_blank\">https://github.com/Leftium/todo.taskpaper</a>\n|\n| Quick Links:\n| <a href=\"#WELCOME\">#WELCOME</a> - Open sample with quick welcome/tutorial.\n| <a onclick=\"launchDropBoxChooser()\" >#CHOOSE</a>  - Choose a file from your Dropbox.\n| <a href=\"#NEW\" >#NEW</a>     - Open a new, blank document.\n|\n| help() for features and tips.\n ");
 	  };
 
 	  return CoffeeConsoleWidget;
