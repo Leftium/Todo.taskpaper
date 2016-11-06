@@ -176,6 +176,7 @@ main = () ->
                     ATTENTION: Dropbox chooser was blocked by the browser.
                     Click this link to launch manually:
                     #{openDropboxChooserLink}
+
                     """
         else  # Dropbox
             options =
