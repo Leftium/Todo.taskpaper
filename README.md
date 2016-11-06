@@ -5,15 +5,19 @@ Enhanced text editor for [TaskPaper](http://www.taskpaper.com/) files that runs 
 
 ### Try a live demo in your browser: [leftium.github.io/Todo.taskpaper](https://leftium.github.io/Todo.taskpaper/)
 
-Different URLS result in different behavior:
+Different URL hashes result in different behavior:
 
-- <a href="https://leftium.github.io/Todo.taskpaper/#/public/Top Secret.txt">leftium.github.io/Todo.taskpaper/#/public/Top Secret.txt</a> Opens text files from *your* Dropbox.
-- [leftium.github.io/Todo.taskpaper/#BLANK](https://leftium.github.io/Todo.taskpaper/#BLANK) Opens a blank outline.
-- [leftium.github.io/Todo.taskpaper/#DEMO&cs=%3E%20s...alert%20s%3B%20s](https://leftium.github.io/Todo.taskpaper/#DEMO&cs=%3E%20s%20%3D%20%22I%27m%20CoffeeScript%20from%20the%20Todo.taskpaper%20URL%20hash!%22%0A%3E%20alert%20s%3B%20s) Run/share CoffeeScript [encoded](http://meyerweb.com/eric/tools/dencoder/) in the URL.
-- [leftium.github.io/Todo.taskpaper](https://leftium.github.io/Todo.taskpaper) By default, opens an introductory welcome.taskpaper file.
+- [#WELCOME][WELCOME] By default, opens sample welcome.taskpaper with more information about Todo.taskpaper.
+- [#CHOOSE][CHOOSE] Choose which file to open from your Dropbox. (Click the link if your browser blocks pop-ups.)
+- [#BLANK][BLANK] Opens a blank outline.
+- [#DEMO][DEMO] Run CoffeeScript [encoded][encoded] in the URL. Share with your friends/colleagues.
 
+[WELCOME]: https://leftium.github.io/Todo.taskpaper
+[CHOOSE]: https://leftium.github.io/Todo.taskpaper/#CHOOSE
+[BLANK]: https://leftium.github.io/Todo.taskpaper/#BLANK
+[DEMO]: https://leftium.github.io/Todo.taskpaper/#DEMO&cs=%3E%20s%20%3D%20%22I%27m%20CoffeeScript%20from%20the%20Todo.taskpaper%20URL%20hash!%22%0A%3E%20alert%20s%3B%20s
 
-
+[encoded]: http://meyerweb.com/eric/tools/dencoder/
 
 ![Screenshot](http://leftium.github.io/Todo.taskpaper/Todo.taskpaper.screenshot.png)
 
@@ -35,7 +39,9 @@ Different URLS result in different behavior:
 - **Interactive console with [birch-outline][birch-outline].** Accessed via embedded [CoffeeScript console][cs-repl].
 - **Synchronization between birch-outline and the text editor.** Instant and automatic!
 - **Load files from Dropbox.** Two-way sync coming soon...
-- **Share snippets of CoffeeScript** This [issue](https://github.com/jessegrosjean/birch-outline/issues/3) for birch-outline links to a live reproduction.  
+	- **Dropbox Chooser** lets you browse yours files.
+	- **Direct Dropbox paths** also supported in the URL hash.  
+- **Share snippets of CoffeeScript** via URL. This [issue](https://github.com/jessegrosjean/birch-outline/issues/3) for birch-outline links to a live reproduction.  
 
 ### Planned Features
 
