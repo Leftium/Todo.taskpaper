@@ -8,7 +8,7 @@
 
 .CoffeeConsoleWidget a {
     color: #fff;
-    text-decoration: none;
+    text-decoration: underline;
 }
 .CoffeeConsoleWidget a:hover {
     text-decoration: underline;
