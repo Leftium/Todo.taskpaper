@@ -144,18 +144,23 @@ main = () ->
 
     openDropboxChooserLink = 
         '<a onclick="launchDropBoxChooser()" >Open Dropbox Chooser</a>'
+
     expose.launchDropBoxChooser = () ->
         slog 'launchDropBoxChooser'
-        Dropbox.choose options =
-            extensions: ['text', '.taskpaper', '.txt', '.ft']
-            success: (files) ->
-                p1 = dbx.sharingGetSharedLinkFile options =
-                    url: files[0].link
-                p1.then (fileData) ->
-                    window.location.hash = fileData.path_lower
-                p1.catch (error) ->
-                    slog 'Error @sharingGetSharedLinkFile'
-                    slog error
+        # Get access token first so we can convert the link to a path later
+        if not dbx.accessToken
+            window.location = dbx.getAuthenticationUrl(location.href.split("#")[0], 'CHOOSE')
+        else
+            Dropbox.choose options =
+                extensions: ['text', '.taskpaper', '.txt', '.ft']
+                success: (files) ->
+                    p1 = dbx.sharingGetSharedLinkFile options =
+                        url: files[0].link
+                    p1.then (fileData) ->
+                        window.location.hash = fileData.path_lower
+                    p1.catch (error) ->
+                        slog 'Error @sharingGetSharedLinkFile'
+                        slog error
 
     history.pushState(null, null, "##{path}")
 
@@ -166,9 +171,6 @@ main = () ->
         when 'BLANK', 'NEW', 'DEMO'
             amplify.publish 'outline-ready'
         when 'CHOOSE'
-            # Get access token first so we can convert the link to a path later
-            if not dbx.accessToken
-                window.location = dbx.getAuthenticationUrl(location.href.split("#")[0], 'CHOOSE')
             try
                 launchDropBoxChooser()
             catch e
