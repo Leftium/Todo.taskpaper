@@ -7,6 +7,16 @@ expose = window
 spy = window
 slog = console.log # spy + log
 
+spy.resolveCb = (data) ->
+    window.d = data
+    console.log 'Resolved'
+    console.log data
+
+spy.rejectCb = (error) ->
+    window.e = error
+    console.log 'Rejected'
+    console.log error
+
 import { DockPanel }                 from 'phosphor-dockpanel'
 import { CodeMirrorWidget }          from 'phosphor-codemirror'
 
@@ -127,6 +137,23 @@ main = () ->
     authenticationUrl = dbx.getAuthenticationUrl(location.href.split("#")[0], path)
     authenticationLink = "<a href='#{authenticationUrl}'>#{authenticationUrl}</a>"
 
+    ensureDropboxToken = (state) =>
+        authenticationUrl = dbx.getAuthenticationUrl(location.href.split("#")[0], state)
+
+        promise = new Promise (resolve, reject) ->
+            if not dbx.accessToken
+                window.location = authenticationUrl
+                reject(authenticationUrl)
+
+            # test token with API call
+            dbx.usersGetCurrentAccount()
+                .then (accountData) ->
+                    resolve(accountData)
+                .catch (error) ->
+                    delete localStorage.accessToken
+                    window.location = authenticationUrl
+                    reject(error)
+
     # User chose not to give access to Dropbox account
     dropboxAccessDenied = hashKeys.error is 'access_denied'
     if dropboxAccessDenied
@@ -148,9 +175,7 @@ main = () ->
     expose.launchDropBoxChooser = () ->
         slog 'launchDropBoxChooser'
         # Get access token first so we can convert the link to a path later
-        if not dbx.accessToken
-            window.location = dbx.getAuthenticationUrl(location.href.split("#")[0], 'CHOOSE')
-        else
+        ensureDropboxToken(CHOOSE).then () ->
             Dropbox.choose options =
                 extensions: ['text', '.taskpaper', '.txt', '.ft']
                 success: (files) ->
@@ -229,13 +254,9 @@ main = () ->
                             log "ERROR: File #{path} not found on Dropbox."
                             history.pushState(null, null, "#BLANK")
                         else
-                            if dbx.accessToken?
+                            ensureDropboxToken(path).then () ->
                                 log "ERROR: #{error.error} (Status: #{error.status})"
                                 history.pushState(null, null, "#BLANK")
-                            else
-                                slog 'Redirect:'
-                                slog authenticationUrl
-                                window.location = authenticationUrl
 
 
 
@@ -246,6 +267,7 @@ main = () ->
     expose.amplify = amplify
 
     spy.parseQueryString = parseQueryString
+    spy.ensureDropboxToken = ensureDropboxToken
 
     spy.coffeeconsole = coffeeconsole
     spy.hashKeys = hashKeys
