@@ -60,6 +60,53 @@ CodeMirrorWidget.prototype.loadTarget = (target, callback) ->
 # The main application entry point.
 #
 main = () ->
+    class SyncMaster
+        constructor: () ->
+            @data = '\n'
+        update: (source, data) ->
+            @data = data
+            amplify.publish 'data-updated', source, data
+
+    syncMaster = new SyncMaster()
+
+    class SyncView
+        constructor: (syncMaster) ->
+            @syncMaster = syncMaster
+            @data = '\n'
+
+        update: (data) ->
+            @data = data
+            @syncMaster.update(this, data)
+
+    class DocView extends SyncView
+        constructor: (syncMaster, doc) ->
+            super(syncMaster)
+            @doc = doc
+            @doc.setValue(@syncMaster.data)
+
+            @doc.on 'change', () =>
+                @syncMaster.update(@, @doc.getValue())
+
+            amplify.subscribe 'data-updated', (source, data) =>
+                if source isnt @
+                    if data isnt @doc.getValue()
+                        @doc.setValue(data)
+
+
+    class OutlineView extends SyncView
+        constructor: (syncMaster, outline) ->
+            super(syncMaster)
+            @outline = outline
+
+            outline.onDidEndChanges () =>
+                @syncMaster.update(@, @outline.serialize())
+
+            amplify.subscribe 'data-updated', (source, data) =>
+                if source isnt this
+                    if data isnt @outline.serialize()
+                        outline.reloadSerialization(data)
+
+
     panel = new DockPanel()
     panel.id = 'main'
 
@@ -77,15 +124,12 @@ main = () ->
 
     # Initialize CodeMirror document
     doc = cmTaskpaper.editor.doc
-    doc.on 'change', () =>
-        amplify.publish 'outline-changed', doc.changeGeneration(), 'doc.change'
+    docView = new DocView(syncMaster, doc)
 
     # Initialize outline
-    outline = new birch.Outline.createTaskPaperOutline(doc.getValue())
-    outline.generation = doc.changeGeneration()
-    outline.onDidEndChanges () ->
-        outline.generation++
-        amplify.publish 'outline-changed', outline.generation, 'outline.onDidEndChanges'
+    outline = new birch.Outline.createTaskPaperOutline(syncMaster.data)
+    outlineView = new OutlineView(syncMaster, outline)
+
 
     cmTaskpaper.title.text = 'CodeMirror View'
     panel.insertLeft(cmTaskpaper)
@@ -93,13 +137,6 @@ main = () ->
     panel.attach(document.body)
 
     window.onresize = () -> panel.update()
-
-    amplify.subscribe 'outline-changed', (generation, source) ->
-        # console.log 'outline-changed', generation, source
-        if not doc.isClean(generation)
-            doc.setValue(outline.serialize())
-        if generation > outline.generation # and expose.doc and expose.outline
-            outline.reloadSerialization(doc.getValue())
 
     loadDefault = () ->
         cmTaskpaper.loadTarget './todo.taskpaper', () ->
