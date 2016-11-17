@@ -3,7 +3,7 @@
   "version": "0.0.1",
   "description": "Enhanced text editor for TaskPaper files.",
   "dependencies": {
-    "birch-outline": "^0.1.0",
+    "birch-outline": "^0.2.1",
     "coffee-script": "^1.11.1",
     "dropbox": "^2.4.0",
     "json-loader": "^0.5.4",
