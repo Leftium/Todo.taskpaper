@@ -158,7 +158,7 @@ main = () ->
     window.onresize = () -> panel.update()
 
     loadDefault = () ->
-        cmTaskpaper.loadTarget './todo.taskpaper', () ->
+        cmTaskpaper.loadTarget './welcome.taskpaper', () ->
             contents = doc.getValue()
 
     hashKeys = parseQueryString(location.hash[1...])
