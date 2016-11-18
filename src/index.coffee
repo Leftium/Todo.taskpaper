@@ -17,6 +17,8 @@ spy.rejectCb = (error) ->
     console.log 'Rejected'
     console.log error
 
+import { textExtensions }            from './text-extensions.coffee'
+
 import { DockPanel }                 from 'phosphor-dockpanel'
 import { CodeMirrorWidget }          from 'phosphor-codemirror'
 
@@ -235,7 +237,7 @@ main = () ->
         # (Likely reduce login screens to one time instead of two)
         if dbx.accessToken
             Dropbox.choose options =
-                # extensions: ['text', '.taskpaper', '.txt', '.ft']
+                extensions: textExtensions
                 success: (files) ->
                     window.location.hash = files[0].link
         else
@@ -250,24 +252,19 @@ main = () ->
             p1.then (metaData) =>
                 # source: http://stackoverflow.com/questions/190852
                 fileExtension = (fname) ->
-                    fname.substr((~-fname.lastIndexOf(".") >>> 0) + 2)
+                    fname.substr((~-fname.lastIndexOf(".") >>> 0) + 1)
 
                 if metaData['.tag'] is 'folder'
                     log "ERROR: #{path} is a folder. (Not supported)"
                     history.pushState(null, null, "#BLANK")
-
-
                     dropboxApiReady = false
 
-                textFileExtensions = ['', 'txt', 'taskpaper', 'ft']
-                fileExtension = fileExtension(metaData.name).toLowerCase()
-                if false and fileExtension not in textFileExtensions
+                extension = fileExtension(metaData.name).toLowerCase()
+                if extension not in textExtensions
                     log "ERROR: File #{path} is not a text file (based on file extension)."
                     history.pushState(null, null, "#BLANK")
-
-                    spy.fileExtension = fileExtension
-                    spy.name = metaData.name
                     dropboxApiReady = false
+                    spy.name = metaData.name
 
                 if dropboxApiReady
                     p2 = dbx.filesDownload options
