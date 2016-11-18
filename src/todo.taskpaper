@@ -13,7 +13,7 @@ Special Features of Todo.taskpaper:
 		2. Open the developer console (CTRL-SHIFT-J in Chrome)
 		3. In the console try: outline.serialize()
 	- Use the birch variable just like the docs:
-	    https://github.com/jessegrosjean/birch-outline/blob/master/doc/getting-started.md#node
+		https://github.com/jessegrosjean/birch-outline/blob/master/doc/getting-started.md#node
 
 
 To Create Items:
