@@ -1,0 +1,8 @@
+.LinkViewWidget {
+    overflow-y: scroll;
+}
+
+.LinkViewWidget li[data-type="project"] > p { font-weight: bold; }
+.LinkViewWidget li[data-type="note"] > p { font-style: italic; color: grey; }
+.LinkViewWidget li[data-done] > p { text-decoration: line-through; }
+.LinkViewWidget span[tag] { color: lightgray; font-weight: normal }

@@ -23,6 +23,7 @@ import { DockPanel }                 from 'phosphor-dockpanel'
 import { CodeMirrorWidget }          from 'phosphor-codemirror'
 
 import { CoffeeConsoleWidget }       from './coffeeconsole/coffeeconsole.coffee'
+import { LinkViewWidget }            from './linkview/linkview.coffee'
 
 import { amplify }                   from 'node-amplifyjs/lib/amplify.core.js'
 import { parse as parseQueryString } from 'querystring'
@@ -221,6 +222,12 @@ main = () ->
     coffeeconsole = new CoffeeConsoleWidget()
     coffeeconsole.title.text = 'CoffeeScript REPL'
 
+    linkView = new LinkViewWidget(syncMaster)
+    linkView.title.text = 'Link View'
+
+    spy.linkView = linkView
+
+
     cmTaskpaper = new CodeMirrorWidget({
         mode: 'text/plain'
         lineNumbers: true
@@ -245,7 +252,8 @@ main = () ->
 
 
     cmTaskpaper.title.text = 'CodeMirror View'
-    panel.insertLeft(cmTaskpaper)
+    panel.insertRight(cmTaskpaper)
+    panel.insertRight(linkView)
     panel.insertBottom(coffeeconsole, cmTaskpaper)
     panel.attach(document.body)
 
