@@ -190,11 +190,14 @@ main = () ->
                 $$.addToSaved(line)
                 $$.processSaved(line)
 
-    authenticationUrl = dbx.getAuthenticationUrl(location.href.split("#")[0], path)
-    authenticationLink = "<a href='#{authenticationUrl}'>#{authenticationUrl}</a>"
+    makeAuthenticationUrl = (state) ->
+        dbx.getAuthenticationUrl(location.href.split("#")[0], state)
+
+    url = makeAuthenticationUrl(path)
+    authenticationLink = "<a href='#{url}'>#{url}</a>"
 
     ensureDropboxToken = (state) =>
-        authenticationUrl = dbx.getAuthenticationUrl(location.href.split("#")[0], state)
+        authenticationUrl = makeAuthenticationUrl(state)
 
         promise = new Promise (resolve, reject) ->
             if not dbx.accessToken
@@ -222,27 +225,77 @@ main = () ->
 
             """
 
-    if path is '/' or path is ''
-        path = 'WELCOME'
 
-    openDropboxChooserLink = 
+    openDropboxChooserLink =
         '<a onclick="launchDropBoxChooser()" >Open Dropbox Chooser</a>'
 
     expose.launchDropBoxChooser = () ->
         slog 'launchDropBoxChooser'
-        # Get access token first so we can convert the link to a path later
-        ensureDropboxToken('CHOOSE').then () ->
+        # Check access token first; this allows a smoother login flow UX
+        # (Likely reduce login screens to one time instead of two)
+        if dbx.accessToken
             Dropbox.choose options =
-                extensions: ['text', '.taskpaper', '.txt', '.ft']
+                # extensions: ['text', '.taskpaper', '.txt', '.ft']
                 success: (files) ->
-                    p1 = dbx.sharingGetSharedLinkFile options =
-                        url: files[0].link
-                    p1.then (fileData) ->
-                        window.location.hash = fileData.path_lower
-                    p1.catch (error) ->
-                        slog 'Error @sharingGetSharedLinkFile'
-                        slog error
+                    window.location.hash = files[0].link
+        else
+            window.location = makeAuthenticationUrl('CHOOSE')
 
+    loadDropboxPath = (path) ->
+        options =
+            path: path
+        dropboxApiReady = not dropboxAccessDenied
+        if dropboxApiReady
+            p1 = dbx.filesGetMetadata options
+            p1.then (metaData) =>
+                # source: http://stackoverflow.com/questions/190852
+                fileExtension = (fname) ->
+                    fname.substr((~-fname.lastIndexOf(".") >>> 0) + 2)
+
+                if metaData['.tag'] is 'folder'
+                    log "ERROR: #{path} is a folder. (Not supported)"
+                    history.pushState(null, null, "#BLANK")
+
+
+                    dropboxApiReady = false
+
+                textFileExtensions = ['', 'txt', 'taskpaper', 'ft']
+                fileExtension = fileExtension(metaData.name).toLowerCase()
+                if false and fileExtension not in textFileExtensions
+                    log "ERROR: File #{path} is not a text file (based on file extension)."
+                    history.pushState(null, null, "#BLANK")
+
+                    spy.fileExtension = fileExtension
+                    spy.name = metaData.name
+                    dropboxApiReady = false
+
+                if dropboxApiReady
+                    p2 = dbx.filesDownload options
+
+                    p2.then (fileData) =>
+                        reader = new FileReader()
+
+                        reader.addEventListener 'loadend', () ->
+                            # reader.result contains the contents of blob as a typed array
+                            stringResult = new TextDecoder('utf8').decode(reader.result)
+                            doc.setValue(stringResult)
+
+                        reader.readAsArrayBuffer(fileData.fileBlob)
+
+            p1.catch (error) =>
+                slog error
+                spy.error = error
+                switch error.status
+                    when 409  # Path not found
+                        log "ERROR: File #{path} not found on Dropbox."
+                        history.pushState(null, null, "#BLANK")
+                    else
+                        ensureDropboxToken(path).then () ->
+                            log "ERROR: #{error.error} (Status: #{error.status})"
+                            history.pushState(null, null, "#BLANK")
+
+    if path is '/' or path is ''
+        path = 'WELCOME'
     history.pushState(null, null, "##{path}")
 
     switch path
@@ -262,57 +315,22 @@ main = () ->
 
                     """
         else  # Dropbox
-            options =
-                path: path
-            dropboxApiReady = not dropboxAccessDenied
-            if dropboxApiReady
-                p1 = dbx.filesGetMetadata options
-                p1.then (metaData) =>
-                    # source: http://stackoverflow.com/questions/190852
-                    fileExtension = (fname) ->
-                        fname.substr((~-fname.lastIndexOf(".") >>> 0) + 2)
-
-                    if metaData['.tag'] is 'folder'
-                        log "ERROR: #{path} is a folder. (Not supported)"
-                        history.pushState(null, null, "#BLANK")
-
-
-                        dropboxApiReady = false
-
-                    textFileExtensions = ['', 'txt', 'taskpaper', 'ft']
-                    fileExtension = fileExtension(metaData.name).toLowerCase()
-                    if fileExtension not in textFileExtensions
-                        log "ERROR: File #{path} is not a text file (based on file extension)."
-                        history.pushState(null, null, "#BLANK")
-
-                        spy.fileExtension = fileExtension
-                        spy.name = metaData.name
-                        dropboxApiReady = false
-
-                    if dropboxApiReady
-                        p2 = dbx.filesDownload options
-
-                        p2.then (fileData) =>
-                            reader = new FileReader()
-
-                            reader.addEventListener 'loadend', () ->
-                                # reader.result contains the contents of blob as a typed array
-                                stringResult = new TextDecoder('utf8').decode(reader.result)
-                                doc.setValue(stringResult)
-
-                            reader.readAsArrayBuffer(fileData.fileBlob)
-
-                p1.catch (error) =>
+            # Shared link
+            if ///^https?://www.dropbox.com/s///.test(path)
+                p1 = dbx.sharingGetSharedLinkFile options =
+                    url: path
+                p1.then (fileData) ->
+                    window.location.hash = fileData.path_lower
+                p1.catch (error) ->
+                    slog 'Error @sharingGetSharedLinkFile'
                     slog error
-                    spy.error = error
-                    switch error.status
-                        when 409  # Path not found
-                            log "ERROR: File #{path} not found on Dropbox."
-                            history.pushState(null, null, "#BLANK")
-                        else
-                            ensureDropboxToken(path).then () ->
-                                log "ERROR: #{error.error} (Status: #{error.status})"
-                                history.pushState(null, null, "#BLANK")
+                    ensureDropboxToken(path).then () ->
+                        log "ERROR: #{error.error} (Status: #{error.status})"
+                        history.pushState(null, null, "#BLANK")
+            else
+                loadDropboxPath(path)
+
+
 
 
 
