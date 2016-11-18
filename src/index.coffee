@@ -231,7 +231,7 @@ main = () ->
     expose.launchDropBoxChooser = () ->
         slog 'launchDropBoxChooser'
         # Get access token first so we can convert the link to a path later
-        ensureDropboxToken(CHOOSE).then () ->
+        ensureDropboxToken('CHOOSE').then () ->
             Dropbox.choose options =
                 extensions: ['text', '.taskpaper', '.txt', '.ft']
                 success: (files) ->
