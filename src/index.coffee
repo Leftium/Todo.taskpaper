@@ -344,7 +344,6 @@ main = () ->
     spy.hashKeys = hashKeys
     spy.path = path
     spy.dbx = dbx
-    spy.authenticationUrl = authenticationUrl
     spy.dropboxAccessDenied = dropboxAccessDenied
 
 window.onload = main
