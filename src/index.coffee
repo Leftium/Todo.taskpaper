@@ -63,8 +63,8 @@ main = () ->
     class SyncMaster
         constructor: () ->
             @data = '\n'
+
         update: (source, data) ->
-            @data = data
             amplify.publish 'data-updated', source, data
 
     syncMaster = new SyncMaster()
@@ -72,25 +72,31 @@ main = () ->
     class SyncView
         constructor: (syncMaster) ->
             @syncMaster = syncMaster
-            @data = '\n'
+            @data = syncMaster.data
 
-        update: (data) ->
-            @data = data
-            @syncMaster.update(this, data)
+            amplify.subscribe 'data-updated', (source, data) =>
+                @onUpdate(source, data)
+
+        onDataUpdated: (source, data) ->
+            if this isnt source and @data isnt data
+                @data = data
+                return true
+            else
+                return false
 
     class DocView extends SyncView
         constructor: (syncMaster, doc) ->
             super(syncMaster)
             @doc = doc
-            @doc.setValue(@syncMaster.data)
+            @doc.setValue(@data)
 
             @doc.on 'change', () =>
-                @syncMaster.update(@, @doc.getValue())
+                @data = @doc.getValue()
+                @syncMaster.update(this, @data)
 
-            amplify.subscribe 'data-updated', (source, data) =>
-                if source isnt @
-                    if data isnt @doc.getValue()
-                        @doc.setValue(data)
+        onDataUpdated: (source, data) =>
+            if super(source, data)
+                @doc.setValue(@data)
 
 
     class OutlineView extends SyncView
@@ -99,13 +105,11 @@ main = () ->
             @outline = outline
 
             outline.onDidEndChanges () =>
-                @syncMaster.update(@, @outline.serialize())
+                @syncMaster.update(this, @outline.serialize())
 
-            amplify.subscribe 'data-updated', (source, data) =>
-                if source isnt this
-                    if data isnt @outline.serialize()
-                        outline.reloadSerialization(data)
-
+        onDataUpdated: (source, data) =>
+            if super(source, data)
+                @outline.reloadSerialization(@data)
 
     panel = new DockPanel()
     panel.id = 'main'
@@ -129,6 +133,11 @@ main = () ->
     # Initialize outline
     outline = new birch.Outline.createTaskPaperOutline(syncMaster.data)
     outlineView = new OutlineView(syncMaster, outline)
+
+
+    spy.syncMaster = syncMaster
+    spy.docView = docView
+    spy.outlineView = outlineView
 
 
     cmTaskpaper.title.text = 'CodeMirror View'
