@@ -97,6 +97,16 @@ main = () ->
             else
                 return false
 
+    class LinkView extends SyncView
+        constructor: (syncMaster, render) ->
+            super(syncMaster)
+            @render = render
+
+        onDataUpdated: (source, version, data) ->
+            if super(source, version, data)
+                @render(data)
+
+
     class DropboxView extends SyncView
         constructor: (syncMaster, path) ->
             super(syncMaster)
@@ -223,9 +233,12 @@ main = () ->
     coffeeconsole = new CoffeeConsoleWidget()
     coffeeconsole.title.text = 'CoffeeScript REPL'
 
-    linkView = new LinkViewWidget(syncMaster)
-    linkView.title.text = 'Link View'
+    linkViewWidget = new LinkViewWidget(syncMaster)
+    linkViewWidget.title.text = 'Link View'
 
+    linkView = new LinkView(syncMaster, linkViewWidget.render)
+
+    spy.linkViewWidget = linkViewWidget
     spy.linkView = linkView
 
 
@@ -254,7 +267,7 @@ main = () ->
 
     cmTaskpaper.title.text = 'CodeMirror View'
     panel.insertRight(cmTaskpaper)
-    panel.insertRight(linkView)
+    panel.insertRight(linkViewWidget)
     panel.insertBottom(coffeeconsole, cmTaskpaper)
     panel.attach(document.body)
 
