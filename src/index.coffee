@@ -62,10 +62,17 @@ CodeMirrorWidget.prototype.loadTarget = (target, callback) ->
 main = () ->
     class SyncMaster
         constructor: () ->
-            @data = '\n'
+            @data = ''
+            @version = 0
 
         update: (source, data) ->
-            amplify.publish 'data-updated', source, data
+            if source.version is @version and data isnt @data
+                slog ['SyncMaster.update:', this, data is @data].concat(Array.from(arguments))
+                @data = data
+                @version++
+                source.data = data
+                source.version = @version
+                amplify.publish 'data-updated', source, @version, data
 
     syncMaster = new SyncMaster()
 
@@ -73,14 +80,16 @@ main = () ->
         constructor: (syncMaster) ->
             @syncMaster = syncMaster
             @data = syncMaster.data
+            @version = syncMaster.version
 
-            amplify.subscribe 'data-updated', (source, data) =>
-                @onUpdate(source, data)
+            amplify.subscribe 'data-updated', (source, version, data) =>
+                @onDataUpdated(source, version, data)
 
-        onDataUpdated: (source, data) ->
-            if this isnt source and @data isnt data
+        onDataUpdated: (source, version, data) ->
+            if @version < version and @data isnt data
+                slog ['SyncView.onDataUpdated:', this, ].concat(Array.from(arguments))
                 @data = data
-                return true
+                @version = version
             else
                 return false
 
@@ -91,11 +100,11 @@ main = () ->
             @doc.setValue(@data)
 
             @doc.on 'change', () =>
-                @data = @doc.getValue()
-                @syncMaster.update(this, @data)
+                @syncMaster.update(this, @doc.getValue())
 
-        onDataUpdated: (source, data) =>
-            if super(source, data)
+
+        onDataUpdated: (source, version, data) =>
+            if super(source, version, data)
                 @doc.setValue(@data)
 
 
@@ -107,8 +116,9 @@ main = () ->
             outline.onDidEndChanges () =>
                 @syncMaster.update(this, @outline.serialize())
 
-        onDataUpdated: (source, data) =>
-            if super(source, data)
+
+        onDataUpdated: (source, version, data) =>
+            if super(source, version, data)
                 @outline.reloadSerialization(@data)
 
     panel = new DockPanel()
