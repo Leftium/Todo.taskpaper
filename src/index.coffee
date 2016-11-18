@@ -43,6 +43,7 @@ import 'codemirror/addon/fold/foldgutter.js'
 
 import 'codemirror/addon/fold/foldgutter.css'
 import 'codemirror/lib/codemirror.css'
+import './normalize.css'
 import './index.css'
 
 #
