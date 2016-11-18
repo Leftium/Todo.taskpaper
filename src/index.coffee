@@ -95,6 +95,97 @@ main = () ->
             else
                 return false
 
+    class DropboxView extends SyncView
+        constructor: (syncMaster, path) ->
+            super(syncMaster)
+            @path = path
+            @lastProcessingTime = new Date()
+
+            spy.processDropbox = @processDropbox
+
+            setInterval(@heartbeat, 100)
+ 
+        onDataUpdated: (source, version, data) =>
+            slog "DropboxView.onDataUpdated()"
+            # @requestProcessing()
+            @dirty = true
+
+        heartbeat: () =>
+            now = new Date()
+            stale = (now - @lastProcessingTime) > (5 * 1000)
+            if (@dirty or stale) and not @processing
+                @lastProcessingTime = now
+                processDropbox()
+
+        processDropbox: () =>
+
+            finishProcessing = (done) =>
+                @processing = false
+                if done
+                    @dirty = false
+
+            slog 'processDropbox'
+            @startTime = new Date()
+
+            # Check Dropbox for changes
+            @processing = true
+            promise1 = loadDropboxPath(@path)
+            promise1.catch rejectCb
+            promise1.then (data) =>
+                slog.report = (title) =>
+                    slog title
+                    slog "syncView:  ", @version, @data
+                    slog "syncMaster:", @syncMaster.version, @syncMaster.data
+                    slog "Dropbox:   ", '0', data.text
+                    slog "Time:      ", (new Date() - @startTime)  / 1000
+
+                slog.report('BEFORE:')
+                # Only changed on syncMaster
+                if @data is data.text and @data isnt @syncMaster.data
+                    slog "Update syncView and Dropbox. (Only changed on SyncMaster)"
+                    @data = @syncMaster.data
+                    @version = @syncMaster.version
+
+                    # Update Dropbox
+                    promise2 = dbx.filesUpload options =
+                        path: path
+                        contents: @data
+                        mode:
+                            '.tag': 'update'
+                            update: data.rev
+                    promise2.then (metaData) =>
+                        data.text = @data
+                        slog.report('AFTER:')
+
+                        done = @data is @syncMaster.data and
+                               @data is data.text and
+                               @syncMaster.data is data.text
+
+                        finishProcessing(done)
+
+                # Only changed on Dropbox
+                else if @data is @syncMaster.data and @data isnt data.text
+                    slog "Update syncView and SyncMaster. (Only changed on Dropbox)"
+                    @data = data.text
+                    # Update syncMaster
+                    @syncMaster.update(this, @data)
+
+                    slog.report('AFTER:')
+                    done = @data is @syncMaster.data and
+                           @data is data.text and
+                           @syncMaster.data is data.text
+
+                    finishProcessing(done)
+
+                else if @data isnt @syncMaster.data and @data isnt data.text
+                    slog.report('CONFLICT!!\nAFTER:')
+                    finishProcessing(true)
+                else
+                    slog.report('No changes.\nAFTER:')
+                    finishProcessing(true)
+
+
+
     class DocView extends SyncView
         constructor: (syncMaster, doc) ->
             super(syncMaster)
@@ -122,6 +213,7 @@ main = () ->
         onDataUpdated: (source, version, data) =>
             if super(source, version, data)
                 @outline.reloadSerialization(@data)
+
 
     panel = new DockPanel()
     panel.id = 'main'
@@ -244,52 +336,59 @@ main = () ->
             window.location = makeAuthenticationUrl('CHOOSE')
 
     loadDropboxPath = (path) ->
-        options =
-            path: path
-        dropboxApiReady = not dropboxAccessDenied
-        if dropboxApiReady
-            p1 = dbx.filesGetMetadata options
-            p1.then (metaData) =>
-                # source: http://stackoverflow.com/questions/190852
-                fileExtension = (fname) ->
-                    fname.substr((~-fname.lastIndexOf(".") >>> 0) + 1)
+        promise = new Promise (resolve, reject) ->
 
-                if metaData['.tag'] is 'folder'
-                    log "ERROR: #{path} is a folder. (Not supported)"
-                    history.pushState(null, null, "#BLANK")
-                    dropboxApiReady = false
+            options =
+                path: path
+            dropboxApiReady = not dropboxAccessDenied
+            if dropboxApiReady
+                p1 = dbx.filesGetMetadata options
+                p1.then (metaData) =>
+                    # source: http://stackoverflow.com/questions/190852
+                    fileExtension = (fname) ->
+                        fname.substr((~-fname.lastIndexOf(".") >>> 0) + 1)
 
-                extension = fileExtension(metaData.name).toLowerCase()
-                if extension not in textExtensions
-                    log "ERROR: File #{path} is not a text file (based on file extension)."
-                    history.pushState(null, null, "#BLANK")
-                    dropboxApiReady = false
-                    spy.name = metaData.name
-
-                if dropboxApiReady
-                    p2 = dbx.filesDownload options
-
-                    p2.then (fileData) =>
-                        reader = new FileReader()
-
-                        reader.addEventListener 'loadend', () ->
-                            # reader.result contains the contents of blob as a typed array
-                            stringResult = new TextDecoder('utf8').decode(reader.result)
-                            doc.setValue(stringResult)
-
-                        reader.readAsArrayBuffer(fileData.fileBlob)
-
-            p1.catch (error) =>
-                slog error
-                spy.error = error
-                switch error.status
-                    when 409  # Path not found
-                        log "ERROR: File #{path} not found on Dropbox."
+                    if metaData['.tag'] is 'folder'
+                        log "ERROR: #{path} is a folder. (Not supported)"
                         history.pushState(null, null, "#BLANK")
-                    else
-                        ensureDropboxToken(path).then () ->
-                            log "ERROR: #{error.error} (Status: #{error.status})"
+                        dropboxApiReady = false
+
+                    extension = fileExtension(metaData.name).toLowerCase()
+                    if extension not in textExtensions
+                        log "ERROR: File #{path} is not a text file (based on file extension)."
+                        history.pushState(null, null, "#BLANK")
+                        dropboxApiReady = false
+                        spy.name = metaData.name
+
+                    if dropboxApiReady
+                        p2 = dbx.filesDownload options
+
+                        p2.then (fileData) =>
+                            reader = new FileReader()
+
+                            reader.addEventListener 'loadend', () ->
+                                # reader.result contains the contents of blob as a typed array
+                                stringResult = new TextDecoder('utf8').decode(reader.result)
+
+                                data =
+                                    text: stringResult
+                                    rev: metaData.rev
+
+                                resolve(data)
+
+                            reader.readAsArrayBuffer(fileData.fileBlob)
+
+                p1.catch (error) =>
+                    slog error
+                    spy.error = error
+                    switch error.status
+                        when 409  # Path not found
+                            log "ERROR: File #{path} not found on Dropbox."
                             history.pushState(null, null, "#BLANK")
+                        else
+                            ensureDropboxToken(path).then () ->
+                                log "ERROR: #{error.error} (Status: #{error.status})"
+                                history.pushState(null, null, "#BLANK")
 
     if path is '/' or path is ''
         path = 'WELCOME'
@@ -325,7 +424,16 @@ main = () ->
                         log "ERROR: #{error.error} (Status: #{error.status})"
                         history.pushState(null, null, "#BLANK")
             else
-                loadDropboxPath(path)
+                promise = loadDropboxPath(path)
+                promise.then (data) ->
+                    doc.setValue(data.text)
+                    dropboxView = new DropboxView(syncMaster, path)
+                    dropboxView.data = data.text
+                    dropboxView.rev = data.rev
+
+                    spy.dropboxView = dropboxView
+                promise.catch (error) ->
+                    slog 'ERROR'
 
 
 
