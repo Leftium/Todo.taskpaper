@@ -2,6 +2,8 @@ textExtensions = [
     '.taskpaper'
     '.txt'
     '.ft'
+    '.htm'
+    '.html'
 
     # From: https://www.dropbox.com/en/help/6
     ''
