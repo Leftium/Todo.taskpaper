@@ -420,11 +420,27 @@ main = () ->
         path = 'WELCOME'
     history.pushState(null, null, "##{path}")
 
+    exposeVariables = () =>
+        expose.doc = doc
+        expose.outline = outline
+
+        expose.amplify = amplify
+
+        spy.parseQueryString = parseQueryString
+        spy.ensureDropboxToken = ensureDropboxToken
+
+        spy.coffeeconsole = coffeeconsole
+        spy.hashKeys = hashKeys
+        spy.path = path
+        spy.dbx = dbx
+        spy.dropboxAccessDenied = dropboxAccessDenied
+
     loadShebang = (string) ->
         hashView = new HashView(syncMaster)
         syncMaster.update(decodeURIComponent(string))
         amplify.publish 'outline-ready'
         spy.hashView = hashView
+        exposeVariables()
         return
 
     if path[0] is '!'
@@ -474,24 +490,12 @@ main = () ->
                 promise.catch (error) ->
                     slog 'ERROR'
 
+    exposeVariables()
 
 
 
 
 
-    expose.doc = doc
-    expose.outline = outline
-
-    expose.amplify = amplify
-
-    spy.parseQueryString = parseQueryString
-    spy.ensureDropboxToken = ensureDropboxToken
-
-    spy.coffeeconsole = coffeeconsole
-    spy.hashKeys = hashKeys
-    spy.path = path
-    spy.dbx = dbx
-    spy.dropboxAccessDenied = dropboxAccessDenied
 
 window.onload = main
 
