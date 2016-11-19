@@ -69,7 +69,8 @@ main = () ->
             @data = ''
             @version = 0
 
-        update: (source, data) ->
+        update: (data, source) =>
+            source = source or this
             if source.version is @version and data isnt @data
                 slog ['SyncMaster.update:', this, data is @data].concat(Array.from(arguments))
                 @data = data
@@ -96,6 +97,11 @@ main = () ->
                 @version = version
             else
                 return false
+
+    class HashView extends SyncView
+        onDataUpdated: (source, version, data) ->
+            if super(source, version, data)
+                location.hash = '!' + encodeURIComponent(data)
 
     class LinkView extends SyncView
         constructor: (syncMaster, render) ->
@@ -182,7 +188,7 @@ main = () ->
                     slog "Update syncView and SyncMaster. (Only changed on Dropbox)"
                     @data = data.text
                     # Update syncMaster
-                    @syncMaster.update(this, @data)
+                    @syncMaster.update(@data, this)
 
                     slog.report('AFTER:')
                     done = @data is @syncMaster.data and
@@ -207,7 +213,7 @@ main = () ->
             @doc.setValue(@data)
 
             @doc.on 'change', () =>
-                @syncMaster.update(this, @doc.getValue())
+                @syncMaster.update(@doc.getValue(), this)
 
 
         onDataUpdated: (source, version, data) =>
@@ -221,7 +227,7 @@ main = () ->
             @outline = outline
 
             outline.onDidEndChanges () =>
-                @syncMaster.update(this, @outline.serialize())
+                @syncMaster.update(@outline.serialize(), this)
 
 
         onDataUpdated: (source, version, data) =>
@@ -425,11 +431,23 @@ main = () ->
         path = 'WELCOME'
     history.pushState(null, null, "##{path}")
 
+    openShebang = (string) ->
+        hashView = new HashView(syncMaster)
+        syncMaster.update(decodeURIComponent(string))
+        spy.hashView = hashView
+        return
+
+    if path[0] is '!'
+        openShebang(path[1...])
+        return
+
+
     switch path
         when 'WELCOME'
             loadDefault()
             amplify.publish 'outline-ready'
         when 'BLANK', 'NEW', 'DEMO'
+            openShebang('')
             amplify.publish 'outline-ready'
         when 'CHOOSE'
             try
@@ -492,14 +510,22 @@ window.onhashchange = (e) ->
     slog "newURL: #{e.newURL}"
     slog "oldURL: #{e.oldURL}"
 
+    reload = false
+
     reloadWhiteList = ///
         ^WELCOME$
        |^NEW$
        |^CHOOSE$
-    ///
+       |^/
+       |^http
+    ///i
+
+
 
     hash = location.hash[1...]
-    if reloadWhiteList.test(hash)
+    reload ||= reloadWhiteList.test(hash)
+
+    if reload
         slog "loading: #{e.newURL}"
         window.location.reload()
     else
