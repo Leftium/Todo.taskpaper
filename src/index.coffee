@@ -48,6 +48,10 @@ import 'codemirror/lib/codemirror.css'
 import './normalize.css'
 import './index.css'
 
+
+inceptionTour = "#!Welcome%20to%20Todo.taskpaper%20Inception!%0ALevel%201%3A%0A%09-%20Click%20me%3A%20https%3A%2F%2Fleftium.github.io%2FTodo.taskpaper%2F%23!Level%25202%253A%250A%2509-%2520Share%2520me%253A%2520the%2520link%2520in%2520the%2520address%2520bar%2520encodes%2520all%2520my%2520information!%250A%2509-%2520Proceed%2520to%2520Level%25203%253A%2520https%253A%252F%252Fleftium.github.io%252FTodo.taskpaper%252F%2523!Level%2525203%25253A%25250A%252509-%252520Edit%252520me%25253A%252520The%252520URL%252520changes%252520automatically%252520as%252520you%252520type%252509%25250A%252509-%252520Continue%252520to%252520level%2525204%25253A%252520https%25253A%25252F%25252Fleftium.github.io%25252FTodo.taskpaper%25252F%252523!Level%252525204%2525253A%2525250A%25252509-%25252520Please%25252520send%25252520feedback%25252520and%25252520comments%25252520to%25252520john%25252540leftium.com%25252520%25252509%2525250A%25252509-%25252520THE%25252520END!%2525250A%25250A%252509Where%252520did%252520this%252520page%252520come%252520from%25253F%25250A%250A%2509Nothing%2520is%2520stored%2520on%2520a%2520server!%250A%0A%09There%20is%20an%20entire%20document%20hidden%20inside%20that%20link...%0A"
+
+
 #
 # The main application entry point.
 #
@@ -432,6 +436,8 @@ main = () ->
             loadShebang(welcomeTaskpaper)
         when 'BLANK', 'NEW', 'DEMO'
             loadShebang('')
+        when 'INCEPTION'
+            loadShebang(inceptionTour)
         when 'CHOOSE'
             try
                 launchDropBoxChooser()
@@ -502,6 +508,7 @@ window.onhashchange = (e) ->
        |^NEW$
        |^DEMO$
        |^BLANK$
+       |^INCEPTION$
        |^CHOOSE$
        |^/
        |^http
