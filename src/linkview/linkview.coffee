@@ -21,7 +21,67 @@ export class LinkViewWidget extends Widget
         super()
         @addClass('LinkViewWidget')
         @$node = $(@node)
+        @syncMaster = syncMaster
+
+
         @maxLength = 50
+        @linkifyOptions =
+            attributes: (href) ->
+                attributes =
+                    title: href
+            format: (value) =>
+
+                constructUrl = (head, tail) ->
+                    if tail.length
+                        head.concat(tail).join('/')
+                    else
+                        head.join('/')
+
+                truncate = (string, length) ->
+                    if string.length > length
+                        string = string[0...length-1] + '…'
+                    string
+
+
+                # Strip URL hash, query strings, http, www, trailing slash
+                value = value.split('#')[0]
+                             .split('?')[0]
+                             .replace ///^https?://(www[0-9]*\.)?///i, ''
+                             .replace ////$///i, ''
+
+
+                # If URL short enough, don't shorten
+                if value.length < @maxLength
+                    return value
+
+                parts = value.split('/')
+
+                # Start with the domain
+                head = parts.splice(0, 1)
+                tail = []
+
+                # strip file extension
+                lastPart = parts.pop()
+                lastPart = lastPart?.replace ///(index)?\.[a-z]+$///i, ''
+                if lastPart
+                    parts.push(lastPart)
+
+                # Append very last URL fragment, truncating if required
+                lengthLeft = @maxLength - constructUrl(head, tail).length
+                if lengthLeft > 0 and parts.length
+                    fragment = parts.pop()
+                    tail.push(truncate(fragment, lengthLeft))
+
+                # Insert very first URL fragment, truncating if required
+                lengthLeft = @maxLength - constructUrl(head, tail).length
+                if lengthLeft > 0 and parts.length
+                    fragment = parts.shift()
+                    head.push(truncate(fragment, lengthLeft))
+
+                if parts.length
+                    head.push('\u22EF')  # Midline horizontal ellipsis ⋯
+
+                constructUrl(head, tail)
 
     onResize: (msg) =>
         super()
@@ -29,11 +89,11 @@ export class LinkViewWidget extends Widget
     onAfterAttach: (msg) =>
         super()
 
-    render: (startText) =>
-      startText = startText or ''
+    render: (text) =>
+      text ||= @syncMaster.data
       # based on: https://github.com/jessegrosjean/birch-outline/blob/master/doc/getting-started.md
       `
-      var taskPaperOutline = new birch.Outline.createTaskPaperOutline(startText);
+      var taskPaperOutline = new birch.Outline.createTaskPaperOutline(text);
       var item = taskPaperOutline.root.firstChild;
 
       function insertChildren(item, parentUL) {
@@ -61,63 +121,7 @@ export class LinkViewWidget extends Widget
       insertChildren(taskPaperOutline.root, ul)
       @$node.empty()
       @$node.append(ul)
-      @node.innerHTML = linkifyHtml @node.innerHTML, options =
-        attributes: (href) ->
-            attributes =
-                title: href
-        format: (value) =>
-
-            constructUrl = (head, tail) ->
-                if tail.length
-                    head.concat(tail).join('/')
-                else
-                    head.join('/')
-
-            truncate = (string, length) ->
-                if string.length > length
-                    string = string[0...length-1] + '…'
-                string
-
-
-            # Strip URL hash, query strings, http, www, trailing slash
-            value = value.split('#')[0]
-                         .split('?')[0]
-                         .replace ///^https?://(www[0-9]*\.)?///i, ''
-                         .replace ////$///i, ''
-
-
-            # If URL short enough, don't shorten
-            if value.length < @maxLength
-                return value
-
-            parts = value.split('/')
-
-            # Start with the domain
-            head = parts.splice(0, 1)
-            tail = []
-
-            # strip file extension
-            lastPart = parts.pop()
-            lastPart = lastPart?.replace ///(index)?\.[a-z]+$///i, ''
-            if lastPart
-                parts.push(lastPart)
-
-            # Append very last URL fragment, truncating if required
-            lengthLeft = @maxLength - constructUrl(head, tail).length
-            if lengthLeft > 0 and parts.length
-                fragment = parts.pop()
-                tail.push(truncate(fragment, lengthLeft))
-
-            # Insert very first URL fragment, truncating if required
-            lengthLeft = @maxLength - constructUrl(head, tail).length
-            if lengthLeft > 0 and parts.length
-                fragment = parts.shift()
-                head.push(truncate(fragment, lengthLeft))
-
-            if parts.length
-                head.push('\u22EF')  # Midline horizontal ellipsis ⋯
-
-            constructUrl(head, tail)
+      @node.innerHTML = linkifyHtml @node.innerHTML, @linkifyOptions
 
 
 
