@@ -7,6 +7,7 @@
     "coffee-script": "^1.11.1",
     "dropbox": "^2.4.0",
     "json-loader": "^0.5.4",
+    "linkifyjs": "^2.1.3",
     "node-amplifyjs": "0.0.1",
     "phosphor-arrays": "^1.0.6",
     "phosphor-codemirror": "0.0.1",

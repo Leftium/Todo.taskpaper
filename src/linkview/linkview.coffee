@@ -1,8 +1,15 @@
 # PhosphorJS widget that hosts rendering of a Taskpaper Outline.
 
+# To temporarily introspect variables during development.
+spy = window
+slog = console.log # spy + log
+
 import { Widget }   from 'phosphor-widget'
 
-import * as birch                    from 'birch-outline'
+import * as birch   from 'birch-outline'
+
+import * as linkify from 'linkifyjs'
+import linkifyHtml  from 'linkifyjs/html'
 
 import './linkview.css'
 
@@ -53,5 +60,6 @@ export class LinkViewWidget extends Widget
       insertChildren(taskPaperOutline.root, ul)
       @$node.empty()
       @$node.append(ul)
+      @node.innerHTML = linkifyHtml(@node.innerHTML)
 
 
