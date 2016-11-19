@@ -18,6 +18,7 @@ spy.rejectCb = (error) ->
     console.log error
 
 import { textExtensions }            from './text-extensions.coffee'
+import { welcomeTaskpaper }          from './welcome-taskpaper.coffee'
 
 import { DockPanel }                 from 'phosphor-dockpanel'
 import { CodeMirrorWidget }          from 'phosphor-codemirror'
@@ -45,20 +46,6 @@ import 'codemirror/addon/fold/foldgutter.css'
 import 'codemirror/lib/codemirror.css'
 import './normalize.css'
 import './index.css'
-
-#
-# Inject a method to load a file via AJAX.
-#
-CodeMirrorWidget.prototype.loadTarget = (target, callback) ->
-    doc = @_editor.getDoc()
-    xhr = new XMLHttpRequest()
-    xhr.open('GET', target)
-    xhr.onreadystatechange = () ->
-        doc.setValue(xhr.responseText)
-        if xhr.readyState is XMLHttpRequest.DONE and
-           typeof callback is 'function'
-            callback()
-    xhr.send()
 
 #
 # The main application entry point.
@@ -288,10 +275,6 @@ main = () ->
 
     window.onresize = () -> panel.update()
 
-    loadDefault = () ->
-        cmTaskpaper.loadTarget './welcome.taskpaper', () ->
-            contents = doc.getValue()
-
     hashKeys = parseQueryString(location.hash[1...])
 
     # Initialize access token, preferring token in URL query string
@@ -431,24 +414,23 @@ main = () ->
         path = 'WELCOME'
     history.pushState(null, null, "##{path}")
 
-    openShebang = (string) ->
+    loadShebang = (string) ->
         hashView = new HashView(syncMaster)
         syncMaster.update(decodeURIComponent(string))
+        amplify.publish 'outline-ready'
         spy.hashView = hashView
         return
 
     if path[0] is '!'
-        openShebang(path[1...])
+        loadShebang(path[1...])
         return
 
 
     switch path
         when 'WELCOME'
-            loadDefault()
-            amplify.publish 'outline-ready'
+            loadShebang(welcomeTaskpaper)
         when 'BLANK', 'NEW', 'DEMO'
-            openShebang('')
-            amplify.publish 'outline-ready'
+            loadShebang('')
         when 'CHOOSE'
             try
                 launchDropBoxChooser()
@@ -515,6 +497,8 @@ window.onhashchange = (e) ->
     reloadWhiteList = ///
         ^WELCOME$
        |^NEW$
+       |^DEMO$
+       |^BLANK$
        |^CHOOSE$
        |^/
        |^http
