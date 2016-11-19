@@ -19,7 +19,7 @@ Different URL hashes result in different behavior:
 
 [encoded]: http://meyerweb.com/eric/tools/dencoder/
 
-![Screenshot](http://leftium.github.io/Todo.taskpaper/Todo.taskpaper.screenshot.png)
+![Screenshot](http://leftium.github.io/Todo.taskpaper/Todo.taskpaper.screenshot.png?20161119)
 
 
 ### The Todo.taskpaper Vision, and What's Coming:
