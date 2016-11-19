@@ -96,12 +96,16 @@ export class LinkViewWidget extends Widget
             head = parts.splice(0, 1)
             tail = []
 
+            # strip file extension
+            lastPart = parts.pop()
+            lastPart = lastPart?.replace ///(index)?\.[a-z]+$///i, ''
+            if lastPart
+                parts.push(lastPart)
+
             # Append very last URL fragment, truncating if required
             lengthLeft = @maxLength - constructUrl(head, tail).length
             if lengthLeft > 0 and parts.length
                 fragment = parts.pop()
-                # strip file extension
-                fragment = fragment.replace ///(index)?\.[a-z]+$///i, ''
                 tail.push(truncate(fragment, lengthLeft))
 
             # Insert very first URL fragment, truncating if required
@@ -110,7 +114,7 @@ export class LinkViewWidget extends Widget
                 fragment = parts.shift()
                 head.push(truncate(fragment, lengthLeft))
 
-            if tail.length and parts.length
+            if parts.length
                 head.push('\u22EF')  # Midline horizontal ellipsis ⋯
 
             constructUrl(head, tail)
