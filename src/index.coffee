@@ -229,6 +229,7 @@ main = () ->
 
     panel = new DockPanel()
     panel.id = 'main'
+    spy.panel = panel
 
     coffeeconsole = new CoffeeConsoleWidget()
     coffeeconsole.title.text = 'CoffeeScript REPL'
@@ -264,12 +265,18 @@ main = () ->
     spy.docView = docView
     spy.outlineView = outlineView
 
-
     cmTaskpaper.title.text = 'CodeMirror View'
     panel.insertRight(cmTaskpaper)
-    panel.insertRight(linkViewWidget)
     panel.insertBottom(coffeeconsole, cmTaskpaper)
+    panel.insertLeft(linkViewWidget)
+
+
     panel.attach(document.body)
+
+    # adjust panel sizes
+    panel.layout._children[0].setSizes([4,6])
+    panel.layout._children[0].layout._children[1].setSizes([6,4])
+
 
     window.onresize = () -> panel.update()
 
