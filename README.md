@@ -35,21 +35,26 @@ Different URL hashes result in different behavior:
 
 ### Currently Implemented Features:
 
-- **Basic text editor.** With support for folding.
-- **Interactive console with [birch-outline][birch-outline].** Accessed via embedded [CoffeeScript console][cs-repl].
-- **Synchronization between birch-outline and the text editor.** Instant and automatic!
-- **Load files from Dropbox.** Two-way sync coming soon...
-	- **Dropbox Chooser** lets you browse yours files.
+- **Synchronization between views** Instant and automatic!
+	- birch-outline, text editor, link view, Dropbox, URL hash 
+- **Load files from Dropbox.** With automatic two-way sync.
+	- **Dropbox Chooser** lets you browse your files.
 	- **Direct Dropbox paths** also supported in the URL hash.  
-- **Share snippets of CoffeeScript** via URL. This [issue](https://github.com/jessegrosjean/birch-outline/issues/3) for birch-outline links to a live reproduction.  
+- **Share snippets of CoffeeScript** via URL. This [issue](https://github.com/jessegrosjean/birch-outline/issues/3) for birch-outline links to a live reproduction.
+
+#### Currently Implemented Views
+- **Interactive console with [birch-outline][birch-outline].** Accessed via embedded [CoffeeScript console][cs-repl].
+- **Linkified view with neat URL's** Links are automatically shortened.
+- **URL hash view.** Address bar is automatically updated with shareable URL-encoded link.
+- **Basic text editor.** With support for folding.
 
 ### Planned Features
 
-- Dropbox Sync
 - Recurring tasks
 - Enhanced views
 	- Calendar View
-	- Linkify and shorten URL's automatically
+- Plug-in API: Create and share your own custom views! 
+
 
 ---
 
