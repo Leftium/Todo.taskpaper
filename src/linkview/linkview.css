@@ -1,18 +1,23 @@
 .LinkViewWidget {
     overflow-y: scroll;
 }
-.LinkViewWidget li[data-type="project"] > p { font-weight: bold; }
-.LinkViewWidget li[data-type="note"] > p { font-style: italic; color: grey; }
-.LinkViewWidget li[data-done] > p { text-decoration: line-through; }
+.LinkViewWidget li[data-type="project"] { font-weight: bold; }
+.LinkViewWidget li[data-type="note"] { font-style: italic; color: grey; }
+.LinkViewWidget li[data-done] { text-decoration: line-through; }
 .LinkViewWidget span[tag] { color: lightgray; font-weight: normal }
+
+.LinkViewWidget li[depth="2"] { padding-left:  40px; }
+.LinkViewWidget li[depth="3"] { padding-left:  80px; }
+.LinkViewWidget li[depth="4"] { padding-left: 120px; }
+.LinkViewWidget li[depth="5"] { padding-left: 160px; }
+.LinkViewWidget li[depth="6"] { padding-left: 200px; }
+.LinkViewWidget li[depth="7"] { padding-left: 240px; }
+.LinkViewWidget li[depth="8"] { padding-left: 280px; }
+.LinkViewWidget li[depth="9"] { padding-left: 320px; }
 
 .LinkViewWidget ul,
 .LinkViewWidget li {
     list-style-type: none;
-}
-
-.LinkViewWidget ul p,
-.LinkViewWidget li p {
     margin: .38em auto;
 }
 

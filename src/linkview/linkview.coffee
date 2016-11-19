@@ -90,38 +90,27 @@ export class LinkViewWidget extends Widget
         super()
 
     render: (text) =>
-      text ||= @syncMaster.data
-      # based on: https://github.com/jessegrosjean/birch-outline/blob/master/doc/getting-started.md
-      `
-      var taskPaperOutline = new birch.Outline.createTaskPaperOutline(text);
-      var item = taskPaperOutline.root.firstChild;
+        text ||= @syncMaster.data
+        # loosely based on:
+        # https://github.com/jessegrosjean/birch-outline/blob/master/doc/getting-started.md
 
-      function insertChildren(item, parentUL) {
-        item.children.forEach(function (each) {
-          var itemLI = document.createElement('li');
-          each.attributeNames.forEach(function(eachAttribute) {
-            itemLI.setAttribute(eachAttribute, each.getAttribute(eachAttribute));
-          });
+        taskPaperOutline = new birch.Outline.createTaskPaperOutline(text)
+        ul = document.createElement('ul')
 
-          var itemBodyP = document.createElement('p');
-          itemBodyP.innerHTML = each.bodyHighlightedAttributedString.toInlineBMLString();
-          itemLI.appendChild(itemBodyP);
+        item = taskPaperOutline.root
+        while (item = item.nextItem)
+            itemLI = document.createElement('li')
+            for attribute in item.attributeNames
+                itemLI.setAttribute attribute, item.getAttribute(attribute)
+            itemLI.setAttribute 'depth', item.depth
+            itemLI.innerHTML = item.bodyHighlightedAttributedString
+                                   .toInlineBMLString()
 
-          var itemChildrenUL = document.createElement('ul');
-          insertChildren(each, itemChildrenUL);
-          if (itemChildrenUL.firstChild) {
-            itemLI.appendChild(itemChildrenUL);
-          }
+            ul.appendChild(itemLI)
 
-          parentUL.appendChild(itemLI);
-        });
-      };
-      `
-      ul = document.createElement('ul')
-      insertChildren(taskPaperOutline.root, ul)
-      @$node.empty()
-      @$node.append(ul)
-      @node.innerHTML = linkifyHtml @node.innerHTML, @linkifyOptions
+        @$node.empty()
+        @$node.append(ul)
+        @node.innerHTML = linkifyHtml @node.innerHTML, @linkifyOptions
 
 
 
