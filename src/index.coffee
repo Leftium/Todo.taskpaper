@@ -236,6 +236,7 @@ main = () ->
 
     linkViewWidget = new LinkViewWidget(syncMaster)
     linkViewWidget.title.text = 'Link View'
+    linkViewWidget.title.closable = true
 
     linkView = new LinkView(syncMaster, linkViewWidget.render)
 
