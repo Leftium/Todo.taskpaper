@@ -487,12 +487,22 @@ main = () ->
 
 window.onload = main
 
-window.onhashchange = () ->
+window.onhashchange = (e) ->
     slog "onhashchange: #{location.hash}"
-    if window.changeOnlyHash
-        slog 'skip reload'
-    else
-        slog 'reloading...'
+    slog "newURL: #{e.newURL}"
+    slog "oldURL: #{e.oldURL}"
+
+    reloadWhiteList = ///
+        ^WELCOME$
+       |^NEW$
+       |^CHOOSE$
+    ///
+
+    hash = location.hash[1...]
+    if reloadWhiteList.test(hash)
+        slog "loading: #{e.newURL}"
         window.location.reload()
+    else
+        slog "skipping: #{e.newURL}"
 
 
