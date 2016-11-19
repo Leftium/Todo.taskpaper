@@ -146,10 +146,12 @@ main = () ->
             promise1.then (data) =>
                 slog.report = (title) =>
                     slog title
+                    slog "Time:      ", (new Date() - @startTime)  / 1000
+                    return
                     slog "syncView:  ", @version, @data
                     slog "syncMaster:", @syncMaster.version, @syncMaster.data
                     slog "Dropbox:   ", '0', data.text
-                    slog "Time:      ", (new Date() - @startTime)  / 1000
+
 
                 slog.report('BEFORE:')
                 # Only changed on syncMaster
