@@ -21,6 +21,7 @@ export class LinkViewWidget extends Widget
         super()
         @addClass('LinkViewWidget')
         @$node = $(@node)
+        @maxLength = 50
 
     onResize: (msg) =>
         super()
@@ -29,7 +30,7 @@ export class LinkViewWidget extends Widget
         super()
 
     render: (startText) =>
-      startText = startText or 'one:\n\t- two\n\t\tthree\n\t\tfour @done\n\t- five\n\t\tsix'
+      startText = startText or ''
       # based on: https://github.com/jessegrosjean/birch-outline/blob/master/doc/getting-started.md
       `
       var taskPaperOutline = new birch.Outline.createTaskPaperOutline(startText);
@@ -60,6 +61,59 @@ export class LinkViewWidget extends Widget
       insertChildren(taskPaperOutline.root, ul)
       @$node.empty()
       @$node.append(ul)
-      @node.innerHTML = linkifyHtml(@node.innerHTML)
+      @node.innerHTML = linkifyHtml @node.innerHTML, options =
+        attributes: (href) ->
+            attributes =
+                title: href
+        format: (value) =>
+
+            constructUrl = (head, tail) ->
+                if tail.length
+                    head.concat(tail).join('/')
+                else
+                    head.join('/')
+
+            truncate = (string, length) ->
+                if string.length > length
+                    string = string[0...length-1] + '…'
+                string
+
+
+            # Strip URL hash, query strings, http, www, trailing slash
+            value = value.split('#')[0]
+                         .split('?')[0]
+                         .replace ///^https?://(www[0-9]*\.)?///i, ''
+                         .replace ////$///i, ''
+
+
+            # If URL short enough, don't shorten
+            if value.length < @maxLength
+                return value
+
+            parts = value.split('/')
+
+            # Start with the domain
+            head = parts.splice(0, 1)
+            tail = []
+
+            # Append very last URL fragment, truncating if required
+            lengthLeft = @maxLength - constructUrl(head, tail).length
+            if lengthLeft > 0 and parts.length
+                fragment = parts.pop()
+                # strip file extension
+                fragment = fragment.replace ///(index)?\.[a-z]+$///i, ''
+                tail.push(truncate(fragment, lengthLeft))
+
+            # Insert very first URL fragment, truncating if required
+            lengthLeft = @maxLength - constructUrl(head, tail).length
+            if lengthLeft > 0 and parts.length
+                fragment = parts.shift()
+                head.push(truncate(fragment, lengthLeft))
+
+            if tail.length and parts.length
+                head.push('\u22EF')  # Midline horizontal ellipsis ⋯
+
+            constructUrl(head, tail)
+
 
 
