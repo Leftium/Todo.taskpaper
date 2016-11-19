@@ -11,11 +11,13 @@ Different URL hashes result in different behavior:
 - [#CHOOSE][CHOOSE] Dropbox chooser. (Click the link in the CoffeeConsole if your browser blocks pop-ups.)
 - [#BLANK][BLANK] Opens a new, blank outline.
 - [#DEMO][DEMO] Run CoffeeScript [encoded][encoded] in the URL. Share with your friends/colleagues.
+- [#INCEPTION][INCEPTION] A tour of how to edit, share, and save documents; all without a server!
 
 [WELCOME]: https://leftium.github.io/Todo.taskpaper
 [CHOOSE]: https://leftium.github.io/Todo.taskpaper/#CHOOSE
 [BLANK]: https://leftium.github.io/Todo.taskpaper/#BLANK
 [DEMO]: https://leftium.github.io/Todo.taskpaper/#DEMO&cs=%3E%20s%20%3D%20%22I%27m%20CoffeeScript%20from%20the%20Todo.taskpaper%20URL%20hash!%22%0A%3E%20alert%20s%3B%20s
+[INCEPTION]: https://leftium.github.io/Todo.taskpaper/#INCEPTION
 
 [encoded]: http://meyerweb.com/eric/tools/dencoder/
 
