@@ -6,6 +6,7 @@ expose = window
 # To temporarily introspect variables during development.
 spy = window
 slog = console.log # spy + log
+slog = () -> null
 
 spy.resolveCb = (data) ->
     window.d = data
@@ -488,9 +489,11 @@ main = () ->
 window.onload = main
 
 window.onhashchange = (e) ->
+    ###
     slog "onhashchange: #{location.hash}"
     slog "newURL: #{e.newURL}"
     slog "oldURL: #{e.oldURL}"
+    ###
 
     reload = false
 
@@ -510,9 +513,9 @@ window.onhashchange = (e) ->
     reload ||= reloadWhiteList.test(hash)
 
     if reload
-        slog "loading: #{e.newURL}"
+        # slog "loading: #{e.newURL}"
         window.location.reload()
     else
-        slog "skipping: #{e.newURL}"
+        # slog "skipping: #{e.newURL}"
 
 
