@@ -214,13 +214,14 @@ export class CoffeeConsoleWidget extends Widget
         @$inputr    = $('.inputr',    @$node)
         @$inputcopy = $('.inputcopy', @$node)
 
+        @init()
+
     onResize: (msg) =>
         super()
         @resizeInput()
 
     onAfterAttach: (msg) =>
         super()
-        @init()
         @resizeInput()
         @$input.focus()
 
