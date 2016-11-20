@@ -1,5 +1,5 @@
 .LinkViewWidget {
-
+    user-select: text;
 }
 
 .LinkViewWidget li[data-type="project"] { font-weight: bold; }
@@ -26,8 +26,8 @@
 }
 
 .LinkViewWidget .clusterize-scroll {
-  max-height: 100%;
-  overflow-y: auto;
-  overflow-x: hidden;
+    max-height: 100%;
+    overflow-y: auto;
+    overflow-x: hidden;
 }
 
