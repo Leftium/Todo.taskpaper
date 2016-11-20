@@ -4,6 +4,7 @@
   "description": "Enhanced text editor for TaskPaper files.",
   "dependencies": {
     "birch-outline": "^0.2.1",
+    "clusterize.js": "^0.17.2",
     "coffee-script": "^1.11.1",
     "dropbox": "^2.4.0",
     "json-loader": "^0.5.4",

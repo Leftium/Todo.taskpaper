@@ -1,5 +1,5 @@
 .LinkViewWidget {
-    overflow-y: scroll;
+
 }
 .LinkViewWidget li[data-type="project"] { font-weight: bold; }
 .LinkViewWidget li[data-type="note"] { font-style: italic; color: grey; }
@@ -19,5 +19,11 @@
 .LinkViewWidget li {
     list-style-type: none;
     margin: .38em auto;
+}
+
+.LinkViewWidget .clusterize-scroll {
+  max-height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 

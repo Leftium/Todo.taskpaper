@@ -11,10 +11,22 @@ import * as birch   from 'birch-outline'
 import * as linkify from 'linkifyjs'
 import linkifyHtml  from 'linkifyjs/html'
 
+import Clusterize   from 'clusterize.js'
+spy.Clusterize = Clusterize
+
+import 'clusterize.js/clusterize.css'
 import './linkview.css'
+
 
 # class LinkView extends SyncView
 
+htmlFragment = '''
+    <div id="scrollArea" class="clusterize-scroll">
+      <ul id="contentArea" class="clusterize-content">
+        <li class="clusterize-no-data">Loading data…</li>
+      </ul>
+    </div>
+    '''
 
 export class LinkViewWidget extends Widget
     constructor: (syncMaster) ->
@@ -97,6 +109,7 @@ export class LinkViewWidget extends Widget
         taskPaperOutline = new birch.Outline.createTaskPaperOutline(text)
         ul = document.createElement('ul')
 
+        items = []
         item = taskPaperOutline.root
         while (item = item.nextItem)
             itemLI = document.createElement('li')
@@ -106,11 +119,16 @@ export class LinkViewWidget extends Widget
             itemLI.innerHTML = item.bodyHighlightedAttributedString
                                    .toInlineBMLString()
 
-            ul.appendChild(itemLI)
+            items.push(linkifyHtml itemLI.outerHTML, @linkifyOptions)
+
 
         @$node.empty()
-        @$node.append(ul)
-        @node.innerHTML = linkifyHtml @node.innerHTML, @linkifyOptions
+        @$node.append(htmlFragment)
+
+        @clusterize = new Clusterize options =
+            rows: items
+            scrollId: 'scrollArea'
+            contentId: 'contentArea'
 
 
 
