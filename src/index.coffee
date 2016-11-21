@@ -353,10 +353,10 @@ main = () ->
 
 
     openDropboxChooserLink =
-        '<a onclick="launchDropBoxChooser()" >Open Dropbox Chooser</a>'
+        '<a onclick="dropboxChooser()" >Open Dropbox Chooser</a>'
 
-    expose.launchDropBoxChooser = () ->
-        slog 'launchDropBoxChooser'
+    expose.dropboxChooser = () ->
+        slog 'dropboxChooser'
         # Check access token first; this allows a smoother login flow UX
         # (Likely reduce login screens to one time instead of two)
         if dbx.accessToken
@@ -463,7 +463,7 @@ main = () ->
             loadShebang(inceptionTour)
         when 'CHOOSE'
             try
-                launchDropBoxChooser()
+                dropboxChooser()
             catch e
                 log """
                     ATTENTION: Dropbox chooser was blocked by the browser.
