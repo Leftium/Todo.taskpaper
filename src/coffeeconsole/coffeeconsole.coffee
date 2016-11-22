@@ -299,7 +299,7 @@ export class CoffeeConsoleWidget extends Widget
           |
           | Quick Links:
           | <a href="#WELCOME">#WELCOME</a> - Open sample with quick welcome/tutorial.
-          | <a onclick="launchDropBoxChooser()" >#CHOOSE</a>  - Open a file from your Dropbox.
+          | <a onclick="dropboxChooser()" >#CHOOSE</a>  - Open a file from your Dropbox.
           | <a href="#NEW" >#NEW</a>     - Open a new, blank document.
           |
           | help() for features and tips.
