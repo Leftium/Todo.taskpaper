@@ -232,7 +232,7 @@ main = () ->
     spy.panel = panel
 
     coffeeconsole = new CoffeeConsoleWidget()
-    coffeeconsole.title.text = 'CoffeeScript REPL'
+    coffeeconsole.title.text = 'Console'
     coffeeconsole.title.closable = true
 
     linkViewWidget = new LinkViewWidget(syncMaster)
@@ -245,7 +245,7 @@ main = () ->
     spy.linkView = linkView
 
 
-    cmTaskpaper = new CodeMirrorWidget({
+    textView = new CodeMirrorWidget({
         mode: 'text/plain'
         lineNumbers: true
         foldGutter:
@@ -253,11 +253,11 @@ main = () ->
         gutters: ['CodeMirror-linenumbers', 'CodeMirror-foldgutter']
         tabSize: 4
     })
-    cmTaskpaper.title.text = 'CodeMirror View'
-    cmTaskpaper.title.closable = true
+    textView.title.text = 'Text View'
+    textView.title.closable = true
 
     # Initialize CodeMirror document
-    doc = cmTaskpaper.editor.doc
+    doc = textView.editor.doc
     docView = new DocView(syncMaster, doc)
 
     # Initialize outline
@@ -269,13 +269,13 @@ main = () ->
     spy.docView = docView
     spy.outlineView = outlineView
 
-    panel.insertRight(cmTaskpaper)
-    panel.insertBottom(coffeeconsole, cmTaskpaper)
+    panel.insertRight(textView)
+    panel.insertBottom(coffeeconsole, textView)
     panel.insertLeft(linkViewWidget)
 
-    spy.ctp = spy.cmTaskpaper = cmTaskpaper
+    spy.ctp = spy.textView = textView
     spy.cc = spy.coffeeconsole = coffeeconsole
-    spy.lvw = spy.cmTaskpaper = linkViewWidget
+    spy.lvw = spy.textView = linkViewWidget
 
 
     panel.attach(document.body)
