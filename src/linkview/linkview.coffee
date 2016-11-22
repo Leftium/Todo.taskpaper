@@ -21,8 +21,8 @@ import './linkview.css'
 # class LinkView extends SyncView
 
 htmlFragment = '''
-    <div id="scrollArea" class="clusterize-scroll">
-      <ul id="contentArea" class="clusterize-content">
+    <div class="clusterize-scroll">
+      <ul class="clusterize-content">
         <li class="clusterize-no-data">Loading data…</li>
       </ul>
     </div>
@@ -127,8 +127,6 @@ export class LinkViewWidget extends Widget
 
         @clusterize = new Clusterize options =
             rows: items
-            scrollId: 'scrollArea'
-            contentId: 'contentArea'
-
-
+            scrollElem: $('.clusterize-scroll', @node)[0]
+            contentElem: $('.clusterize-content', @node)[0]
 
