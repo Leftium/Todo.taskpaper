@@ -167,3 +167,13 @@ body {
   box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
   transform: translateX(-40%) translateY(-58%);
 }
+
+.CodeMirror-scrollbar-filler, .CodeMirror-gutter-filler {
+    background-color: #fdf6e3;
+}
+
+.cm-s-solarized.CodeMirror {
+    -moz-box-shadow: none;
+    -webkit-box-shadow: none;
+    box-shadow: none;
+}
