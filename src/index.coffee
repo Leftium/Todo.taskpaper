@@ -6,7 +6,7 @@ expose = window
 # To temporarily introspect variables during development.
 spy = window
 slog = console.log # spy + log
-slog = () -> null
+# slog = () -> null
 
 spy.resolveCb = (data) ->
     window.d = data
@@ -94,16 +94,6 @@ main = () ->
         onDataUpdated: (source, version, data) ->
             if super(source, version, data)
                 location.hash = '!' + encodeURIComponent(data)
-
-    class LinkView extends SyncView
-        constructor: (syncMaster, render) ->
-            super(syncMaster)
-            @render = render
-
-        onDataUpdated: (source, version, data) ->
-            if super(source, version, data)
-                @render(data)
-
 
     class DropboxView extends SyncView
         constructor: (syncMaster, path) ->
@@ -226,66 +216,83 @@ main = () ->
             if super(source, version, data)
                 @outline.reloadSerialization(@data)
 
+    expose.makeLinkView = (title='Link View', closable=true) ->
+        class LinkView extends SyncView
+            constructor: (syncMaster, render) ->
+                super(syncMaster)
+                @render = render
 
-    panel = new DockPanel()
-    panel.id = 'main'
-    spy.panel = panel
+            onDataUpdated: (source, version, data) ->
+                if super(source, version, data)
+                    @render(data)
 
-    coffeeconsole = new CoffeeConsoleWidget()
-    coffeeconsole.title.text = 'Console'
-    coffeeconsole.title.closable = true
+        linkView = new LinkViewWidget(syncMaster)
+        linkView.title.text = title
+        linkView.title.closable = closable
 
-    linkViewWidget = new LinkViewWidget(syncMaster)
-    linkViewWidget.title.text = 'Link View'
-    linkViewWidget.title.closable = true
+        linkView.syncView = new LinkView(syncMaster, linkView.render)
 
-    linkView = new LinkView(syncMaster, linkViewWidget.render)
-
-    spy.linkViewWidget = linkViewWidget
-    spy.linkView = linkView
-
-
-    textView = new CodeMirrorWidget({
-        mode: 'text/plain'
-        lineNumbers: true
-        foldGutter:
-            rangeFinder: CodeMirror.fold.indent
-        gutters: ['CodeMirror-linenumbers', 'CodeMirror-foldgutter']
-        tabSize: 4
-    })
-    textView.title.text = 'Text View'
-    textView.title.closable = true
-
-    # Initialize CodeMirror document
-    doc = textView.editor.doc
-    docView = new DocView(syncMaster, doc)
-
-    # Initialize outline
-    outline = new birch.Outline.createTaskPaperOutline(syncMaster.data)
-    outlineView = new OutlineView(syncMaster, outline)
+        return linkView
 
 
-    spy.syncMaster = syncMaster
-    spy.docView = docView
-    spy.outlineView = outlineView
+    expose.makeTextView = (title='Text View', closable=true) ->
+        textView = new CodeMirrorWidget options =
+            mode: 'text/plain'
+            lineNumbers: true
+            foldGutter:
+                rangeFinder: CodeMirror.fold.indent
+            gutters: ['CodeMirror-linenumbers', 'CodeMirror-foldgutter']
+            tabSize: 4
 
-    panel.insertRight(textView)
-    panel.insertBottom(coffeeconsole, textView)
-    panel.insertLeft(linkViewWidget)
+        textView.title.text = title
+        textView.title.closable = closable
 
-    spy.ctp = spy.textView = textView
-    spy.cc = spy.coffeeconsole = coffeeconsole
-    spy.lvw = spy.textView = linkViewWidget
+        doc = textView.editor.doc
+        expose.doc = doc
+        docView = new DocView(syncMaster, doc)
 
-
-    panel.attach(document.body)
-
-    # adjust panel sizes
-    panel.layout._children[0].setSizes([4,6])
-    panel.layout._children[0].layout._children[1].setSizes([6,4])
+        return textView
 
 
-    window.onresize = () -> panel.update()
+    expose.makeConsole = (title='Console', closable=true) ->
+        consoleView = new CoffeeConsoleWidget()
+        consoleView.title.text = title
+        consoleView.title.closable = closable
+        return consoleView
+
+
+    initPanel = () ->
+        slog "initPanel()"
+
+        # Initialize outline
+        outline = new birch.Outline.createTaskPaperOutline(syncMaster.data)
+        expose.outline = outline
+        outlineView = new OutlineView(syncMaster, outline)
+
+        panel = new DockPanel()
+        panel.id = 'main'
+        panel.attach(document.body)
+        window.onresize = () -> panel.update()
+        spy.panel = panel
+
+        spy.coffeeConsole = makeConsole()
+        spy.linkView = makeLinkView()
+        spy.textView = makeTextView()
+
+        spy.syncMaster = syncMaster
+        spy.outlineView = outlineView
+        spy.cc = spy.coffeeConsole = coffeeConsole
+        spy.tv = spy.textView = textView
+        spy.lv = spy.linkView = linkView
+
+
+        panel.insertRight(textView)
+        panel.insertBottom(coffeeConsole, textView)
+        panel.insertLeft(linkView)
+
+        # adjust panel sizes
+        panel.layout._children[0].setSizes([4,6])
+        panel.layout._children[0].layout._children[1].setSizes([6,4])
 
     hashKeys = parseQueryString(location.hash[1...])
 
@@ -427,15 +434,12 @@ main = () ->
     history.pushState(null, null, "##{path}")
 
     exposeVariables = () =>
-        expose.doc = doc
-        expose.outline = outline
 
         expose.amplify = amplify
 
         spy.parseQueryString = parseQueryString
         spy.ensureDropboxToken = ensureDropboxToken
 
-        spy.coffeeconsole = coffeeconsole
         spy.hashKeys = hashKeys
         spy.path = path
         spy.dbx = dbx
@@ -449,6 +453,7 @@ main = () ->
         exposeVariables()
         return
 
+    initPanel()
     if path[0] is '!'
         loadShebang(path[1...])
         return
@@ -472,19 +477,7 @@ main = () ->
 
                     """
         else  # Dropbox
-            # Shared link
-            if ///^https?://www.dropbox.com/s///.test(path)
-                p1 = dbx.sharingGetSharedLinkFile options =
-                    url: path
-                p1.then (fileData) ->
-                    window.location.hash = fileData.path_lower
-                p1.catch (error) ->
-                    slog 'Error @sharingGetSharedLinkFile'
-                    slog error
-                    ensureDropboxToken(path).then () ->
-                        log "ERROR: #{error.error} (Status: #{error.status})"
-                        history.pushState(null, null, "#BLANK")
-            else
+            afterDropbox = (path) ->
                 promise = loadDropboxPath(path)
                 promise.then (data) ->
                     doc.setValue(data.text)
@@ -493,10 +486,30 @@ main = () ->
                     dropboxView.rev = data.rev
 
                     spy.dropboxView = dropboxView
+
                 promise.catch (error) ->
                     slog 'ERROR'
 
+            # Shared link
+            if ///^https?://www.dropbox.com/s///.test(path)
+                p1 = dbx.sharingGetSharedLinkFile options =
+                    url: path
+                p1.then (fileData) ->
+                    window.supressReload = true
+                    window.location.hash = fileData.path_lower
+                    afterDropbox(fileData.path_lower)
+                p1.catch (error) ->
+                    slog 'Error @sharingGetSharedLinkFile'
+                    slog error
+                    ensureDropboxToken(path).then () ->
+                        log "ERROR: #{error.error} (Status: #{error.status})"
+                        history.pushState(null, null, "#BLANK")
+            else
+                afterDropbox(path)
+
+
     exposeVariables()
+
 
 
 
@@ -506,11 +519,9 @@ main = () ->
 window.onload = main
 
 window.onhashchange = (e) ->
-    ###
     slog "onhashchange: #{location.hash}"
     slog "newURL: #{e.newURL}"
     slog "oldURL: #{e.oldURL}"
-    ###
 
     reload = false
 
@@ -530,10 +541,12 @@ window.onhashchange = (e) ->
     hash = location.hash[1...]
     reload ||= reloadWhiteList.test(hash)
 
-    if reload
+    if reload and not window.supressReload
         # slog "loading: #{e.newURL}"
+        slog "supressReload", window.supressReload
         window.location.reload()
     else
         # slog "skipping: #{e.newURL}"
+        window.supressReload = false
 
 
