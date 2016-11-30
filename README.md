@@ -3,7 +3,7 @@
 Enhanced text editor for [TaskPaper](http://www.taskpaper.com/) files that runs in your browser.
 
 
-### Try a live demo in your browser: [leftium.github.io/Todo.taskpaper](https://leftium.github.io/Todo.taskpaper/)
+### Try a live demo in your browser: [todo-taskpaper.leftium.com](https://todo-taskpaper.leftium.com/)
 
 Different URL hashes result in different behavior:
 
@@ -13,15 +13,16 @@ Different URL hashes result in different behavior:
 - [#DEMO][DEMO] Run CoffeeScript [encoded][encoded] in the URL. Share with your friends/colleagues.
 - [#INCEPTION][INCEPTION] A tour of how to edit, share, and save documents; all without a server!
 
-[WELCOME]: https://leftium.github.io/Todo.taskpaper
-[CHOOSE]: https://leftium.github.io/Todo.taskpaper/#CHOOSE
-[BLANK]: https://leftium.github.io/Todo.taskpaper/#BLANK
-[DEMO]: https://leftium.github.io/Todo.taskpaper/#DEMO&cs=%3E%20s%20%3D%20%22I%27m%20CoffeeScript%20from%20the%20Todo.taskpaper%20URL%20hash!%22%0A%3E%20alert%20s%3B%20s
-[INCEPTION]: https://leftium.github.io/Todo.taskpaper/#INCEPTION
+[WELCOME]: https://todo-taskpaper.leftium.com/
+[CHOOSE]: https://todo-taskpaper.leftium.com/#CHOOSE
+[BLANK]: https://todo-taskpaper.leftium.com/#BLANK
+[DEMO]: https://todo-taskpaper.leftium.com/#DEMO&cs=%3E%20s%20%3D%20%22I%27m%20CoffeeScript%20from%20the%20Todo.taskpaper%20URL%20hash!%22%0A%3E%20alert%20s%3B%20s
+[INCEPTION]: https://todo-taskpaper.leftium.com/#INCEPTION
 
 [encoded]: http://meyerweb.com/eric/tools/dencoder/
 
 ![Screenshot](http://leftium.github.io/Todo.taskpaper/Todo.taskpaper.screenshot.png?20161119)
+
 
 
 ### The Todo.taskpaper Vision, and What's Coming:
