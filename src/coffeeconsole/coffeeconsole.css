@@ -1,13 +1,14 @@
 /* solarized color scheme: http://ethanschoonover.com/solarized
 
+                   Solarized Dark        Solarized Light
 base03    #002b36  background
 base02    #073642  background highlight
-base01    #586e75  comments, secondary
-base00    #657b83
+base01    #586e75  comments, secondary   emphasis
+base00    #657b83                        text, primary
 base0     #839496  text, primary
-base1     #93a1a1  emphasis
-base2     #eee8d5
-base3     #fdf6e3
+base1     #93a1a1  emphasis              comments, secondary
+base2     #eee8d5                        background highlight
+base3     #fdf6e3                        background
 
 yellow    #b58900
 orange    #cb4b16
@@ -20,8 +21,8 @@ green     #859900
 
 */
 .CoffeeConsoleWidget {
-    background-color: #002b36;
-    color: #839496;
+    background-color: #fdf6e3;
+    color: #657b83;
     font-size: 14px;
     font-family: Consolas, Courier New, DejaVu Sans Mono, monospace;
     overflow-y: scroll;
@@ -29,14 +30,14 @@ green     #859900
 }
 
 .CoffeeConsoleWidget a {
-    color: #839496;
+    color: #657b83;
     text-decoration: none;
-    border-bottom: 1px solid #839496;
+    border-bottom: 1px solid #657b83;
 }
 .CoffeeConsoleWidget a:hover {
     color: #eee8d5;
     text-decoration: none;
-    border-bottom: 1px solid #839496;
+    border-bottom: 1px solid #657b83;
 }
 .CoffeeConsoleWidget pre {
     margin: 0;
@@ -67,8 +68,8 @@ green     #859900
 .CoffeeConsoleWidget .input {
     border: none;
     outline: none;
-    background-color: #002b36;
-    color: #839496;
+    background-color: #fdf6e3;
+    color: #657b83;
     font: inherit;
     margin: 0;
     padding: 0;
