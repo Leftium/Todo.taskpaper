@@ -44,7 +44,7 @@ import 'codemirror/addon/fold/indent-fold.js'
 import 'codemirror/addon/fold/foldgutter.js'
 
 import 'codemirror/addon/fold/foldgutter.css'
-import 'codemirror/lib/codemirror.css'
+import 'codemirror/theme/solarized.css'
 import './normalize.css'
 import './index.css'
 
@@ -237,6 +237,7 @@ main = () ->
 
     expose.makeTextView = (title='Text View', closable=true) ->
         textView = new CodeMirrorWidget options =
+            theme: 'solarized light'
             mode: 'text/plain'
             lineNumbers: true
             foldGutter:
