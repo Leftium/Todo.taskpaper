@@ -35,27 +35,6 @@ body {
   min-height: 50px;
 }
 
-
-.red {
-  background: #E74C3C;
-}
-
-
-.yellow {
-  background: #F1C40F;
-}
-
-
-.green {
-  background: #27AE60;
-}
-
-
-.blue {
-  background: #3498DB;
-}
-
-
 .p-DockTabPanel {
   padding-right: 2px;
   padding-bottom: 2px;
