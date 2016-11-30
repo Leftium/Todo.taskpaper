@@ -29,16 +29,6 @@ green     #859900
     user-select: text;
 }
 
-.CoffeeConsoleWidget a {
-    color: #657b83;
-    text-decoration: none;
-    border-bottom: 1px solid #657b83;
-}
-.CoffeeConsoleWidget a:hover {
-    color: #586e75;
-    text-decoration: none;
-    border-bottom: 1px solid #586e75;
-}
 .CoffeeConsoleWidget pre {
     margin: 0;
     padding: 0;

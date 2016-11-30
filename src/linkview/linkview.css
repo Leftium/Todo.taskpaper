@@ -1,11 +1,12 @@
 .LinkViewWidget {
     user-select: text;
+    color: #657b83;
 }
 
 .LinkViewWidget li[data-type="project"] { font-weight: bold; }
-.LinkViewWidget li[data-type="note"] { font-style: italic; color: grey; }
+.LinkViewWidget li[data-type="note"] { font-style: italic; color: #93a1a1; }
 .LinkViewWidget li[data-done] { text-decoration: line-through; }
-.LinkViewWidget span[tag] { color: lightgray; font-weight: normal }
+.LinkViewWidget span[tag] { color: #2aa198; font-weight: normal }
 
 .LinkViewWidget span[link] { position: relative;}
 .LinkViewWidget span[lead] { position: absolute; left: -10px }

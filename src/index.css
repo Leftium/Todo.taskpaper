@@ -10,6 +10,28 @@ body {
   padding: 0;
   background: #F5F6F7;
   overflow: hidden;
+  color: #657b83;
+}
+
+a {
+  color: #268bd2;
+  text-decoration: none;
+  border-bottom: 1px solid #268bd2;
+}
+a:visited {
+  color: #6c71c4;
+  text-decoration: none;
+  border-bottom: 1px solid #6c71c4;
+}
+a:hover {
+  color: #859900;
+  text-decoration: none;
+  border-bottom: 1px solid #859900;
+}
+a:active {
+  color: #dc322f;
+  text-decoration: none;
+  border-bottom: 1px solid #dc322f;
 }
 
 
@@ -156,3 +178,4 @@ body {
     -webkit-box-shadow: none;
     box-shadow: none;
 }
+
