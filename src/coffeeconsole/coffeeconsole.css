@@ -35,9 +35,9 @@ green     #859900
     border-bottom: 1px solid #657b83;
 }
 .CoffeeConsoleWidget a:hover {
-    color: #eee8d5;
+    color: #586e75;
     text-decoration: none;
-    border-bottom: 1px solid #657b83;
+    border-bottom: 1px solid #586e75;
 }
 .CoffeeConsoleWidget pre {
     margin: 0;
