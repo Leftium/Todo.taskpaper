@@ -6,7 +6,7 @@ expose = window
 # To temporarily introspect variables during development.
 spy = window
 slog = console.log # spy + log
-# slog = () -> null
+slog = () -> null
 
 spy.resolveCb = (data) ->
     window.d = data
