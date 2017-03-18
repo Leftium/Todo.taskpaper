@@ -132,7 +132,7 @@ export class LinkViewWidget extends Widget
                 itemLI.setAttribute attribute, item.getAttribute(attribute)
             itemLI.setAttribute 'depth', item.depth
             itemLI.innerHTML = item.bodyHighlightedAttributedString
-                                   .toInlineBMLString()
+                                   .toInlineBMLString() or '&nbsp;'
 
             items.push(linkifyHtml itemLI.outerHTML, @linkifyOptions)
 
