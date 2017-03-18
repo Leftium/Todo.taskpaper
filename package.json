@@ -4,11 +4,11 @@
   "description": "Enhanced text editor for TaskPaper files.",
   "dependencies": {
     "birch-outline": "^0.2.1",
-    "clusterize.js": "^0.17.2",
-    "coffee-script": "^1.11.1",
-    "dropbox": "^2.4.0",
+    "clusterize.js": "^0.17.6",
+    "coffee-script": "^1.12.4",
+    "dropbox": "^2.5.2",
     "json-loader": "^0.5.4",
-    "linkifyjs": "^2.1.3",
+    "linkifyjs": "^2.1.4",
     "node-amplifyjs": "0.0.1",
     "phosphor-arrays": "^1.0.6",
     "phosphor-codemirror": "0.0.1",
@@ -26,14 +26,14 @@
     "util": "^0.10.3"
   },
   "devDependencies": {
-    "babel-core": "^6.18.0",
-    "babel-loader": "^6.2.6",
-    "babel-preset-es2015": "^6.18.0",
-    "coffee-loader": "^0.7.2",
-    "coffee-script": "^1.11.1",
+    "babel-core": "^6.24.0",
+    "babel-loader": "^6.4.1",
+    "babel-preset-env": "^1.2.2",
+
+    "coffee-loader": "^0.7.3",
     "css-loader": "^0.23.1",
-    "rimraf": "^2.4.2",
-    "style-loader": "^0.13.0",
+    "rimraf": "^2.6.1",
+    "style-loader": "^0.13.2",
     "webpack": "~2.2.1"
   },
   "scripts": {

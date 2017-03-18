@@ -9,10 +9,23 @@ module.exports = {
   },
   bail: true,
   module: {
-    loaders: [
-      { test: /\.coffee$/, loader: 'babel-loader?presets[]=es2015!coffee-loader' },
-      { test: /\.json$/, loader: "json-loader"},
-      { test: /\.css$/, loader: 'style-loader!css-loader' },
+    rules: [
+      { test: /\.coffee$/,
+        use: [
+          {
+              loader: 'babel-loader',
+              options: {
+                  presets: [["env", {
+                      "targets": {
+                          "browsers": ["last 2 versions"]
+                      }
+                  }]]
+              }
+          },
+          'coffee-loader'
+        ],
+      },
+      { test: /\.css$/, use: ['style-loader', 'css-loader'] },
     ]
   },
   plugins: [
