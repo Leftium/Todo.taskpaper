@@ -97,6 +97,8 @@ export class LinkViewWidget extends Widget
 
     onResize: (msg) =>
         super()
+        @clusterize?.refresh()
+
 
     onAfterAttach: (msg) =>
         super()
