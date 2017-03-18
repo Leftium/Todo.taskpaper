@@ -110,8 +110,23 @@ export class LinkViewWidget extends Widget
         ul = document.createElement('ul')
 
         items = []
-        item = taskPaperOutline.root
-        while (item = item.nextItem)
+
+        itemPath = @itemPath or '*'
+        results = taskPaperOutline.evaluateItemPath(itemPath)
+
+        if itemPath isnt '*'
+            itemLI = document.createElement('li')
+            itemLI.innerHTML = "ItemPath: #{itemPath} (#{results.length} results)<br><hr>"
+            items.push(itemLI.outerHTML)
+
+        knownParents =
+            'Birch': true
+
+        addItem = (item) =>
+            knownParents[item.id] = true
+            if item.parent and not knownParents[item.parent.id]
+                addItem(item.parent)
+
             itemLI = document.createElement('li')
             for attribute in item.attributeNames
                 itemLI.setAttribute attribute, item.getAttribute(attribute)
@@ -121,6 +136,8 @@ export class LinkViewWidget extends Widget
 
             items.push(linkifyHtml itemLI.outerHTML, @linkifyOptions)
 
+        for item in results
+            addItem(item)
 
         @$node.empty()
         @$node.append(htmlFragment)
@@ -129,4 +146,8 @@ export class LinkViewWidget extends Widget
             rows: items
             scrollElem: $('.clusterize-scroll', @node)[0]
             contentElem: $('.clusterize-content', @node)[0]
+
+    search: (itemPath) =>
+        @itemPath = itemPath
+        @render()
 
