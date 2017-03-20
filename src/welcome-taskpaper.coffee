@@ -29,5 +29,5 @@ exports.welcomeTaskpaper =
     To Fold, Focus, and Filter Items:
         - To fold/unfold an item click the arrow to the left of the item.
         - To focus on a single project...  @available(soon)
-        - To filter your list...  @available(soon)
+        - To filter your list enter a query in the search field.
     """
