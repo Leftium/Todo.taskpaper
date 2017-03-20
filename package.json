@@ -38,7 +38,7 @@
   },
   "scripts": {
     "clean": "rimraf src/bundle.js",
-    "build": "webpack --config src/webpack.conf.js",
+    "build": "webpack --config src/webpack.conf.coffee",
     "postinstall": "npm dedupe",
     "prepublish": "npm run build"
   },
