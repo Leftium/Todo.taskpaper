@@ -32,3 +32,40 @@
     overflow-x: hidden;
 }
 
+
+.flex-container {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+
+    padding-left: 1em;
+}
+
+.flex-container ul {
+    padding-left: 0;
+}
+
+.search-form {
+    width: 100%;
+}
+
+.search-form input {
+    box-sizing: border-box;
+    width: 100%;
+}
+
+.clusterize-node {
+    flex-grow: 1;
+    overflow: hidden;
+
+    position:relative;
+}
+
+.clusterize {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+}
+

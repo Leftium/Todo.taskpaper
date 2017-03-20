@@ -21,10 +21,21 @@ import './linkview.css'
 # class LinkView extends SyncView
 
 htmlFragment = '''
-    <div class="clusterize-scroll">
-      <ul class="clusterize-content">
-        <li class="clusterize-no-data">Loading data…</li>
-      </ul>
+    <div class="flex-container">
+        <div class="search-form">
+            <input type="text" class="search" placeholder="Search"/>
+        </div>
+        <div class="clusterize-node"></div>
+    </div>
+    '''
+
+clusterizeHtmlFragment = '''
+    <div class="clusterize">
+        <div class="clusterize-scroll">
+          <ul class="clusterize-content">
+            <li class="clusterize-no-data">Loading data…</li>
+          </ul>
+        </div>
     </div>
     '''
 
@@ -35,6 +46,8 @@ export class LinkViewWidget extends Widget
         @$node = $(@node)
         @syncMaster = syncMaster
 
+        @$node.append(htmlFragment)
+        @$clusterizeNode = $('.clusterize-node', @node)
 
         @maxLength = 50
         @linkifyOptions =
@@ -111,14 +124,22 @@ export class LinkViewWidget extends Widget
         taskPaperOutline = new birch.Outline.createTaskPaperOutline(text)
         ul = document.createElement('ul')
 
+        totalItems = taskPaperOutline.items.length
+        errorMessage = ''
         items = []
 
         itemPath = @itemPath or '*'
         results = taskPaperOutline.evaluateItemPath(itemPath)
 
-        if itemPath isnt '*'
+        if not results.length
+            itemPath = '*'
+            results = taskPaperOutline.items
+            errorMessage = '<i> (Original query returned no results. Check your query.)</i>'
+
+
+        if false and (itemPath isnt '*' or errorMessage)
             itemLI = document.createElement('li')
-            itemLI.innerHTML = "ItemPath: #{itemPath} (#{results.length} results)<br><hr>"
+            itemLI.innerHTML = "#{results.length}/#{totalItems} results for: #{itemPath}#{errorMessage}<hr>"
             items.push(itemLI.outerHTML)
 
         knownParents =
@@ -141,13 +162,24 @@ export class LinkViewWidget extends Widget
         for item in results
             addItem(item)
 
-        @$node.empty()
-        @$node.append(htmlFragment)
 
-        @clusterize = new Clusterize options =
-            rows: items
-            scrollElem: $('.clusterize-scroll', @node)[0]
-            contentElem: $('.clusterize-content', @node)[0]
+        if @clusterize
+            @clusterize.update(items)
+        else
+            @$clusterizeNode.empty()
+            @$clusterizeNode.append(clusterizeHtmlFragment)
+
+            @clusterize = new Clusterize options =
+                rows: items
+                scrollElem: $('.clusterize-scroll', @node)[0]
+                contentElem: $('.clusterize-content', @node)[0]
+
+        @searchInput = $('.search', @node)[0]
+        @searchInput.oninput = () =>
+            slog @searchInput.value
+            setTimeout(
+                () => @search(@searchInput.value)
+            , 0)
 
     search: (itemPath) =>
         @itemPath = itemPath
