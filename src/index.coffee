@@ -5,8 +5,52 @@ expose = window
 
 # To temporarily introspect variables during development.
 spy = window
-slog = console.log # spy + log
-slog = () -> null
+
+slogTags =
+  ALL: 1
+
+
+# spy + log
+slog = () =>
+    args = if arguments.length is 1 then [arguments[0]] else Array.apply(null, arguments)
+    args.unshift("[slog]")
+    console.log.apply null, args
+
+sdir = () =>
+    args = if arguments.length is 1 then [arguments[0]] else Array.apply(null, arguments)
+    args.unshift("[sdir]")
+    console.dir.apply null, args
+
+handler = (baseMethod) =>
+    object =
+        get: (target, name) =>
+          if slogTags.ALL or slogTags[name]
+            () ->
+              args = if arguments.length is 1 then [arguments[0]] else Array.apply(null, arguments)
+              args.unshift("@#{name}")
+              baseMethod.apply null, args
+          else
+            () -> true
+
+
+
+
+slog = new Proxy(slog, handler(console.log))
+sdir = new Proxy(sdir, handler(console.log))
+
+window.slog = slog
+
+slog 'no tags'
+slog.tag 'tagged', 'two args'
+
+
+
+slog = new Proxy(slog, handler)
+
+window.slog = slog
+# slog = () -> null
+
+
 
 spy.resolveCb = (data) ->
     window.d = data
@@ -43,6 +87,10 @@ import 'codemirror/addon/fold/foldcode.js'
 import 'codemirror/addon/fold/indent-fold.js'
 import 'codemirror/addon/fold/foldgutter.js'
 
+import { DocState, Peer } from '../lib/ot_toy.js'
+
+spy.DocState = DocState
+
 import 'codemirror/addon/fold/foldgutter.css'
 import 'codemirror/theme/solarized.css'
 import './normalize.css'
@@ -52,10 +100,104 @@ import './index.css'
 inceptionTour = "#!Welcome%20to%20Todo.taskpaper%20Inception!%0ALevel%201%3A%0A%09-%20Click%20me%3A%20https%3A%2F%2Fleftium.github.io%2FTodo.taskpaper%2F%23!Level%25202%253A%250A%2509-%2520Share%2520me%253A%2520the%2520link%2520in%2520the%2520address%2520bar%2520encodes%2520all%2520my%2520information!%250A%2509-%2520Proceed%2520to%2520Level%25203%253A%2520https%253A%252F%252Fleftium.github.io%252FTodo.taskpaper%252F%2523!Level%2525203%25253A%25250A%252509-%252520Edit%252520me%25253A%252520The%252520URL%252520changes%252520automatically%252520as%252520you%252520type%252509%25250A%252509-%252520Continue%252520to%252520level%2525204%25253A%252520https%25253A%25252F%25252Fleftium.github.io%25252FTodo.taskpaper%25252F%252523!Level%252525204%2525253A%2525250A%25252509-%25252520Please%25252520send%25252520feedback%25252520and%25252520comments%25252520to%25252520john%25252540leftium.com%25252520%25252509%2525250A%25252509-%25252520THE%25252520END!%2525250A%25250A%252509Where%252520did%252520this%252520page%252520come%252520from%25253F%25250A%250A%2509Nothing%2520is%2520stored%2520on%2520a%2520server!%250A%0A%09There%20is%20an%20entire%20document%20hidden%20inside%20that%20link...%0A"
 
 
+
+`
+    var pri = Math.floor(Math.random() * 0x1000000);
+    var ser = 0;
+    function getid() {
+        return (pri * 0x100000) + ser++;
+    }
+    function diffToOps(diff, docState) {
+        // console.log('diffToOps');
+        var startTime = new Date()
+
+        var start = diff[0];
+        var end = diff[1];
+        var newstr = diff[2];
+        var result = [];
+        for (var i = start; i < end; i++) {
+            result.push({pri: pri, ty: 'del', ix: docState.xform_ix(i), id: getid()});
+        }
+        var ix = docState.xform_ix(end);
+        for (var i = 0; i < newstr.length; i++) {
+            result.push({pri: pri, ty: 'ins', ix: ix + i, id: getid(), ch: newstr.charAt(i)});
+        }
+        // console.log('diffToOps: ' + (new Date() - startTime))
+        return result;
+    }
+    function getDiff(oldText, newText, cursor) {
+        // console.log('getDiff');
+        var startTime = new Date();
+
+        var delta = newText.length - oldText.length;
+        var limit = Math.max(0, cursor - delta);
+        var end = oldText.length;
+        while (end > limit && oldText.charAt(end - 1) == newText.charAt(end + delta - 1)) {
+            end -= 1;
+        }
+        var start = 0;
+        var startLimit = cursor - Math.max(0, delta);
+        while (start < startLimit && oldText.charAt(start) == newText.charAt(start)) {
+            start += 1;
+        }
+        // console.log('getDiff: ' + (new Date() - startTime))
+        return [start, end, newText.slice(start, end + delta)];
+    }
+`
+
+asynchronously = (method) =>
+    setTimeout method, 0
+
+
 #
 # The main application entry point.
 #
 main = () ->
+    class Sync
+        constructor: () ->
+            @id = 'Sync'
+            @data = ''
+            @docState = new DocState()
+            @peer = new Peer()
+
+            amplify.subscribe 'update', (ops) =>
+                asynchronously () =>
+                    rev = @docState.ops.length
+
+                    @peer.merge_op(@docState, op) for op in ops
+                    @onUpdate(@docState.get_str())
+
+                    # not needed?
+                    #
+                    #if rev < @docState.ops.length
+                    #    amplify.publish('update', ops.slice(rev))
+
+        onUpdate: (newData) =>
+            if newData isnt @data
+                @data = newData
+                true
+            else
+                false
+
+
+        update: (newData, cursor=0) ->
+            return
+            asynchronously () =>
+                diff = getDiff(@data, newData, cursor)
+                ops = diffToOps(diff, @docState)
+
+                # apply ops locally
+                @docState.add(op) for op in ops
+
+                @data = newData
+
+                amplify.publish 'update', ops
+
+
+
+
+
+
     class SyncMaster
         constructor: () ->
             @data = ''
@@ -69,7 +211,7 @@ main = () ->
                 @version++
                 source.data = data
                 source.version = @version
-                amplify.publish 'data-updated', source, @version, data
+                # amplify.publish 'data-updated', source, @version, data
 
     syncMaster = new SyncMaster()
 
@@ -188,52 +330,56 @@ main = () ->
 
 
 
-    class DocView extends SyncView
-        constructor: (syncMaster, doc) ->
-            super(syncMaster)
+    class DocView extends Sync
+        constructor: (doc) ->
+            super()
+            @id += '.docview'
             @doc = doc
             @doc.setValue(@data)
 
-            @doc.on 'change', () =>
-                @syncMaster.update(@doc.getValue(), this)
+            @doc.on 'changes', (cm, changes) =>
+                for change,i in changes
+                    slog.doc 'change', i
+                    slog.doc 'from:   ', change.from
+                    slog.doc 'to:     ', change.to
+                    slog.doc 'text:   ', change.text
+                    slog.doc 'origin: ', change.origin
 
+                @update(@doc.getValue())
 
-        onDataUpdated: (source, version, data) =>
-            if super(source, version, data)
+        onUpdate: (data) =>
+            if super(data)
                 @doc.setValue(@data)
 
 
-    class OutlineView extends SyncView
-        constructor: (syncMaster, outline) ->
-            super(syncMaster)
+    class OutlineView extends Sync
+        constructor: (outline) ->
+            super()
+            @id += '.outlineview'
             @outline = outline
 
             outline.onDidEndChanges () =>
-                @syncMaster.update(@outline.serialize(), this)
+                @update(@outline.serialize())
 
-
-        onDataUpdated: (source, version, data) =>
-            if super(source, version, data)
+        onUpdate: (data) =>
+            if super(data)
                 @outline.reloadSerialization(@data)
 
-    expose.makeLinkView = (title='Link View', closable=true) ->
-        class LinkView extends SyncView
-            constructor: (syncMaster, render) ->
-                super(syncMaster)
-                @render = render
 
-            onDataUpdated: (source, version, data) ->
-                if super(source, version, data)
-                    @render(data)
 
-        linkView = new LinkViewWidget(syncMaster)
-        linkView.title.text = title
-        linkView.title.closable = closable
 
-        linkView.syncView = new LinkView(syncMaster, linkView.render)
+    class LinkView extends Sync
+        constructor: (title='Link View', closable=true) ->
+            super()
+            @id += '.linkview'
+            @widget = new LinkViewWidget()
 
-        return linkView
+            @widget.title.text = title
+            @widget.title.closable = closable
 
+        onUpdate: (data) =>
+            if super(data)
+                @widget.render(@data)
 
     expose.makeTextView = (title='Text View', closable=true) ->
         textView = new CodeMirrorWidget options =
@@ -248,9 +394,10 @@ main = () ->
         textView.title.text = title
         textView.title.closable = closable
 
-        doc = textView.editor.doc
+        doc = textView.editor
         expose.doc = doc
-        docView = new DocView(syncMaster, doc)
+        docView = new DocView(doc)
+        spy.dv = spy.docView = docView
 
         return textView
 
@@ -266,9 +413,9 @@ main = () ->
         slog "initPanel()"
 
         # Initialize outline
-        outline = new birch.Outline.createTaskPaperOutline(syncMaster.data)
+        outline = new birch.Outline.createTaskPaperOutline("")
         expose.outline = outline
-        outlineView = new OutlineView(syncMaster, outline)
+        outlineView = new OutlineView(outline)
 
         panel = new DockPanel()
         panel.id = 'main'
@@ -277,11 +424,11 @@ main = () ->
         spy.panel = panel
 
         spy.coffeeConsole = makeConsole()
-        spy.linkView = makeLinkView()
+        linkView = new LinkView()
         spy.textView = makeTextView()
 
         spy.syncMaster = syncMaster
-        spy.outlineView = outlineView
+        spy.ov = spy.outlineView = outlineView
         spy.cc = spy.coffeeConsole = coffeeConsole
         spy.tv = spy.textView = textView
         spy.lv = spy.linkView = linkView
@@ -289,7 +436,7 @@ main = () ->
 
         panel.insertRight(textView)
         panel.insertBottom(coffeeConsole, textView)
-        panel.insertLeft(linkView)
+        panel.insertLeft(linkView.widget)
 
         # adjust panel sizes
         panel.layout._children[0].setSizes([4,6])

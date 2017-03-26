@@ -40,11 +40,10 @@ clusterizeHtmlFragment = '''
     '''
 
 export class LinkViewWidget extends Widget
-    constructor: (syncMaster) ->
+    constructor: () ->
         super()
         @addClass('LinkViewWidget')
         @$node = $(@node)
-        @syncMaster = syncMaster
 
         @$node.append(htmlFragment)
         @$clusterizeNode = $('.clusterize-node', @node)
@@ -117,7 +116,7 @@ export class LinkViewWidget extends Widget
         super()
 
     render: (text) =>
-        text ||= @syncMaster.data
+        text
         # loosely based on:
         # https://github.com/jessegrosjean/birch-outline/blob/master/doc/getting-started.md
 
