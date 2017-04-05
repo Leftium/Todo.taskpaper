@@ -94,6 +94,10 @@ main = () ->
 
         expose.editor = textView.editor
 
+        editor.on 'beforeChange', (cm, change) =>
+            if publishUpdates
+                amplify.publish 'before-updated-editor', editor, change
+
         editor.on 'changes', (cm, changes) =>
             if publishUpdates
                 amplify.publish 'updated-editor', editor, changes
@@ -110,9 +114,35 @@ main = () ->
     initPanel = () ->
         slog "initPanel()"
 
+        expose.itemize = (items) =>
+            _itemize = (item) =>
+                value = null
+                switch typeof item
+                    when 'string', 'undefined' 
+                        value = outline.createItem(item)
+                return value
+            if items.constructor is Array
+                (_itemize(item) for item in items)
+            else
+                _itemize(items)
+
+        expose.insertBefore = (items, row) =>
+            items = itemize(items)
+            referenceItem = outline.items[row]
+            outline.insertItemsBefore(items, referenceItem)
+
+
+        expose.remove = (row) =>
+            outline.removeItems(outline.items[row])
+
         # Initialize outline
-        outline = new birch.Outline.createTaskPaperOutline('')
-        outline.reloadSerialization('')
+        outline = new birch.Outline.createTaskPaperOutline('Row: 1')
+        # outline.reloadSerialization('')
+
+        insertBefore("Row: #{r}") for r in [2..3]
+
+
+
 
         outline.onDidEndChanges (changes) =>
             if publishUpdates
@@ -121,10 +151,12 @@ main = () ->
         expose.birch = birch
         expose.outline = outline
 
+        ###
         outline1 = new birch.Outline.createTaskPaperOutline("")
         outline2 = new birch.Outline.createTaskPaperOutline("")
         expose.o1 = outline1
         expose.o2 = outline2
+        ###
 
         panel = new DockPanel()
         panel.id = 'main'
@@ -137,8 +169,10 @@ main = () ->
         linkView.title.text = 'Link View'
         linkView.title.closable = true
         expose.linkview = linkView
+        linkView.render(outline)
 
         spy.textView = makeTextView()
+        textView.editor.setValue(outline.serialize())
 
         spy.cc = spy.coffeeConsole = coffeeConsole
         spy.tv = spy.textView = textView
@@ -157,26 +191,10 @@ main = () ->
     exposeVariables = () =>
         expose.amplify = amplify
 
-        expose.itemize = (items) =>
-            _itemize = (item) =>
-                value = null
-                switch typeof item
-                    when 'string', 'undefined' 
-                        value = outline.createItem(item)
-                return value
-            if items.constructor is Array
-                (_itemize(item) for item in items)
-            else
-                _itemize(items)
 
 
-        expose.insertBefore = (items, row) =>
-            items = itemize(items)
-            referenceItem = outline.items[row]
-            outline.insertItemsBefore(items, referenceItem)
 
-        expose.remove = (row) =>
-            outline.removeItems(outline.items[row])
+
 
 
         expose.unshiftItem = (item=outline.createItem('')) =>
@@ -212,6 +230,17 @@ main = () ->
     initPanel()
     exposeVariables()
 
+    amplify.subscribe 'before-updated-editor', (editor, change) =>
+        slog.editor '--- BEFORE CHANGE -------------------------------------'
+        slog.editor 'from:   ', change.from
+        slog.editor 'to:     ', change.to
+        slog.editor 'text:   ', change.text
+        slog.editor 'removed:   ', change.removed
+        slog.editor 'origin: ', change.origin
+
+        text = editor.getRange(change.from, change.to)
+        slog.editor 'text*: ', [text]
+
     amplify.subscribe 'updated-editor', (editor, changes) =>
         publishUpdates = false
         for change,i in changes
@@ -225,7 +254,7 @@ main = () ->
             slog.editor 'origin: ', change.origin
 
             text = editor.getRange(change.from, changeEnd)
-            slog.editor 'text: ', [text]
+            slog.editor 'text!: ', [text]
 
             updateWindow = [0, 0]
             updateWindow[0] = change.from.line
