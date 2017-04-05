@@ -40,9 +40,11 @@ clusterizeHtmlFragment = '''
     '''
 
 export class LinkViewWidget extends Widget
-    constructor: () ->
+    constructor: (outline) ->
         super()
         @addClass('LinkViewWidget')
+
+        @outline = outline
         @$node = $(@node)
 
         @$node.append(htmlFragment)
@@ -115,24 +117,25 @@ export class LinkViewWidget extends Widget
     onAfterAttach: (msg) =>
         super()
 
-    render: (text) =>
-        text
+    render: (outline=@outline) =>
+
         # loosely based on:
         # https://github.com/jessegrosjean/birch-outline/blob/master/doc/getting-started.md
 
-        taskPaperOutline = new birch.Outline.createTaskPaperOutline(text)
+        # taskPaperOutline = new birch.Outline.createTaskPaperOutline(text)
+        @outline = outline
         ul = document.createElement('ul')
 
-        totalItems = taskPaperOutline.items.length
+        totalItems = @outline.items.length
         errorMessage = ''
         items = []
 
         itemPath = @itemPath or '*'
-        results = taskPaperOutline.evaluateItemPath(itemPath)
+        results = @outline.evaluateItemPath(itemPath)
 
         if not results.length
             itemPath = '*'
-            results = taskPaperOutline.items
+            results = @outline.items
             errorMessage = '<i> (Original query returned no results. Check your query.)</i>'
 
 
@@ -153,7 +156,7 @@ export class LinkViewWidget extends Widget
             for attribute in item.attributeNames
                 itemLI.setAttribute attribute, item.getAttribute(attribute)
             itemLI.setAttribute 'depth', item.depth
-            itemLI.innerHTML = item.bodyHighlightedAttributedString
+            itemLI.innerHTML = "<code>#{item.id}&nbsp;&nbsp;</code>" + item.bodyHighlightedAttributedString
                                    .toInlineBMLString() or '&nbsp;'
 
             items.push(linkifyHtml itemLI.outerHTML, @linkifyOptions)
@@ -179,6 +182,7 @@ export class LinkViewWidget extends Widget
             setTimeout(
                 () => @search(@searchInput.value)
             , 0)
+        1
 
     search: (itemPath) =>
         @itemPath = itemPath

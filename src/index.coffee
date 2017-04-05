@@ -56,7 +56,6 @@ import { CoffeeConsoleWidget }       from './coffeeconsole/coffeeconsole.coffee'
 import { LinkViewWidget }            from './linkview/linkview.coffee'
 
 import { amplify }                   from 'node-amplifyjs/lib/amplify.core.js'
-import { parse as parseQueryString } from 'querystring'
 
 import * as birch                    from 'birch-outline'
 
@@ -74,6 +73,7 @@ import 'codemirror/theme/solarized.css'
 import './normalize.css'
 import './index.css'
 
+publishUpdates = true
 
 #
 # The main application entry point.
@@ -92,16 +92,11 @@ main = () ->
         textView.title.text = title
         textView.title.closable = closable
 
-        editor = textView.editor
+        expose.editor = textView.editor
 
         editor.on 'changes', (cm, changes) =>
-            for change,i in changes
-                slog.editor 'change', i
-                slog.editor 'from:   ', change.from
-                slog.editor 'to:     ', change.to
-                slog.editor 'text:   ', change.text
-                slog.editor 'origin: ', change.origin
-
+            if publishUpdates
+                amplify.publish 'updated-editor', editor, changes
         return textView
 
 
@@ -116,12 +111,20 @@ main = () ->
         slog "initPanel()"
 
         # Initialize outline
-        outline = new birch.Outline.createTaskPaperOutline("")
-        outline.onDidEndChanges () =>
-            @update(@outline.serialize())
+        outline = new birch.Outline.createTaskPaperOutline('')
+        outline.reloadSerialization('')
 
+        outline.onDidEndChanges (changes) =>
+            if publishUpdates
+                amplify.publish 'updated-outline', outline, changes
+
+        expose.birch = birch
         expose.outline = outline
 
+        outline1 = new birch.Outline.createTaskPaperOutline("")
+        outline2 = new birch.Outline.createTaskPaperOutline("")
+        expose.o1 = outline1
+        expose.o2 = outline2
 
         panel = new DockPanel()
         panel.id = 'main'
@@ -133,6 +136,7 @@ main = () ->
         linkView = new LinkViewWidget()
         linkView.title.text = 'Link View'
         linkView.title.closable = true
+        expose.linkview = linkView
 
         spy.textView = makeTextView()
 
@@ -149,46 +153,221 @@ main = () ->
         panel.layout._children[0].setSizes([4,6])
         panel.layout._children[0].layout._children[1].setSizes([6,4])
 
-    hashKeys = parseQueryString(location.hash[1...])
-
-    # Initialize access token, preferring token in URL query string
-    accessToken = hashKeys.access_token
-    accessToken = accessToken || localStorage.accessToken
-    # Cache value for future use
-    if accessToken?
-        localStorage.accessToken = accessToken
-
-    path = hashKeys?.state or location.hash[1...].split('&')[0]
-
-    if script = hashKeys.coffee or hashKeys.cs
-        expose.birch = birch
-        expose.outline = outline
-        log 'CoffeeScript detected in hash:'
-
-        script = script.replace(/^>/, '')
-        lines = script.split('\n>')
-
-        amplify.subscribe 'outline-ready', () =>
-            for line in lines
-                log "      > #{line}"
-                $$.addToSaved(line)
-                $$.processSaved(line)
-
-    if path is '/' or path is ''
-        path = 'WELCOME'
-    history.pushState(null, null, "##{path}")
 
     exposeVariables = () =>
-
         expose.amplify = amplify
 
-        spy.parseQueryString = parseQueryString
+        expose.itemize = (items) =>
+            _itemize = (item) =>
+                value = null
+                switch typeof item
+                    when 'string', 'undefined' 
+                        value = outline.createItem(item)
+                return value
+            if items.constructor is Array
+                (_itemize(item) for item in items)
+            else
+                _itemize(items)
 
-        spy.hashKeys = hashKeys
-        spy.path = path
+
+        expose.insertBefore = (items, row) =>
+            items = itemize(items)
+            referenceItem = outline.items[row]
+            outline.insertItemsBefore(items, referenceItem)
+
+        expose.remove = (row) =>
+            outline.removeItems(outline.items[row])
+
+
+        expose.unshiftItem = (item=outline.createItem('')) =>
+            outline.insertItemsBefore(
+                item,
+                outline.root.nextItem
+            )
+
+        expose.shiftItem = () =>
+            item = outline.root.nextItem
+            outline.removeItems(item)
+            item
+
+        expose.appendItem = (item=outline.createItem('')) =>
+            outline.insertItemsBefore(
+                item
+            )
+
+        expose.popItem = () =>
+            item = outline.root.lastDescendant
+            outline.removeItems(item)
+            item
+
+        expose.rollUp = () =>
+            shiftItem()
+            appendItem()
+
+        expose.rollDown = () =>
+            unshiftItem()
+            popItem()
+
 
     initPanel()
     exposeVariables()
+
+    amplify.subscribe 'updated-editor', (editor, changes) =>
+        publishUpdates = false
+        for change,i in changes
+            slog.editor '--- CHANGE ----------------------------------------', i
+            slog.editor 'from:   ', change.from
+            slog.editor 'to:     ', change.to
+            changeEnd = CodeMirror.changeEnd(change)
+            slog.editor 'to*:    ', changeEnd
+            slog.editor 'text:   ', change.text
+            slog.editor 'removed:   ', change.removed
+            slog.editor 'origin: ', change.origin
+
+            text = editor.getRange(change.from, changeEnd)
+            slog.editor 'text: ', [text]
+
+            updateWindow = [0, 0]
+            updateWindow[0] = change.from.line
+            updateWindow[1] = changeEnd.line
+            slog.editor 'update window:', updateWindow
+
+
+            text = editor.getRange({line: change.from.line, ch: 0}, {line: changeEnd.line})
+            slog.editor 'text*: ', [text]
+
+            updateLines = text.split('\n')
+            slog.editor 'update lines:', updateLines
+
+            insertPoint = updateWindow[0]
+            if change.from.ch isnt 0 or (change.from.line is change.to.line and change.from.ch is change.to.ch and updateLines[0] isnt '')
+                insertPoint = updateWindow[0] + 1
+                slog.editor 'insert point++'
+
+            slog.editor 'insert point:', insertPoint
+
+            ###
+            How many lines to add?
+                How many lines to prepend?
+                How many lines to append?
+            How many lines to remove?
+
+            First row to update?
+            Final row to update?
+
+            1. Add lines (to maintain id's)
+            2. Remove lines
+            3. Shift lines as needed (to align id's with previous content)
+            ###
+
+            prependLines = []
+            appendLines = []
+
+            prepending = true
+            for line,j in updateLines
+                prependLines.push(line)
+
+
+            if not appendLines.shift()
+                prependLines.shift()
+
+            slog.editor 'prepend:', prependLines
+            slog.editor 'append :', appendLines
+
+            insertBefore(prependLines, insertPoint)
+            insertBefore(appendLines, insertPoint+1)
+
+
+            prependReferenceItem = outline.items[change.from.line]
+            appendReferenceItem  = prependReferenceItem?.nextItem
+
+            linesUpdated = change.text.length - 1
+            linesNeeded  = linesUpdated
+            linesRemoved = change.to.line - change.from.line
+
+
+            slog.editor 'linesNeeded:  ', linesNeeded
+            slog.editor 'linesRemoved: ', linesRemoved
+
+            if linesNeeded > linesRemoved
+                linesNeeded -= linesRemoved
+                linesRemoved = 0
+            else
+                linesRemoved -= linesNeeded
+                linesNeeded = 0
+
+            slog.editor 'linesNeeded*:  ', linesNeeded
+            slog.editor 'linesRemoved*: ', linesRemoved
+
+            while linesRemoved
+                linesRemoved--
+                remove(updateWindow[1])
+
+
+
+            editLines = (i for i in [change.from.line..change.to.line])
+            addLines = (i for i in [0...change.text.length])
+
+            slog.editor 'edit: ', editLines
+            slog.editor 'add:  ', addLines
+
+            for item,k in outline.items
+                item.bodyString = editor.getLine(k)
+
+
+
+
+            linkView.render(outline)
+        publishUpdates = true
+
+
+    amplify.subscribe 'updated-outline', (outline, changes) =>
+        publishUpdates = false
+        for change,i in changes
+            slog.outline 'change', i
+            slog.outline change
+
+            switch change.type
+                when 'body' or 'attribute'
+                    from = { line: change.target.row, ch: 0 }
+                    to   = { line: change.target.row, ch: null }
+                    indent = '\t'.repeat(change.target.depth - 1)
+
+                    editor.replaceRange("#{indent}#{change.target.bodyString}", from, to)
+                when 'children'
+                    change.getFlattendedAddedItems()
+                    change.getFlattendedRemovedItems()
+
+                    for item,j in change.flattendedAddedItems or []
+                        # slog.outline 'item+', j, item
+                        slog.outline item.id, item.row, item.bodyString
+
+                        from = { line: item.row, ch: 0 }
+                        to   = { line: item.row, ch: null }
+
+                        indent = '\t'.repeat(item.depth - 1)
+                        newline = if item.nextItem then '\n' else ''
+
+                        editor.replaceRange("#{indent}#{item.bodyString}#{newline}", from, from)
+
+
+
+                    for item,j in (change.flattenedRemovedItems or []).reverse()
+                        # slog.outline 'item-', j, item
+                        slog.outline item.id, item.row, item.bodyString
+
+                        from = { line: item.row, ch: 0 }
+                        to   = { line: item.row + 1, ch: 0}
+
+                        editor.replaceRange('', from, to)
+
+
+        linkview.render(outline)
+        publishUpdates = true
+
+
+
+
 
 
 window.onload = main
